@@ -85,6 +85,7 @@ export default function App() {
 
   const roles = [
     { label: 'Semua Peran', value: 'ALL' },
+    { label: 'Internship (Open/No-Degree)', value: 'Intern' },
     { label: 'Laravel / PHP', value: 'Laravel' },
     { label: 'Vue.js / Inertia', value: 'Vue' },
     { label: 'Golang', value: 'Go' },

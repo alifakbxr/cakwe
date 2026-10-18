@@ -15,22 +15,39 @@ SEARCH_QUERIES = [
     "Junior Backend",
     "Junior Full Stack",
     "Web Developer Agency",
-    "AI Engineer"
+    "AI Engineer",
     "Forward Deployed Engineer",
+    "Software Engineer Intern",
+    "Backend Intern",
 ]
 
 OUTPUT_DIR = Path(__file__).resolve().parent.parent / "data" / "golden_set"
 OUTPUT_FILE = OUTPUT_DIR / "raw_jobs.json"
 
-# Peran target di judul (PHP, Laravel, Go, TypeScript/Vue/Next/React, Python/FastAPI/AI, Software Engineer, Product/Platform)
+# Peran target di judul (PHP, Laravel, Go, TypeScript/Vue/Next/React, Python/FastAPI/AI, Software Engineer, Product/Platform, Intern)
 TARGET_TITLE_REGEX = re.compile(
-    r"\b(laravel|php|golang|go developer|go backend|vue|fullstack|full stack|backend|software engineer|product engineer|platform engineer|infrastructure engineer|core engineer|core developer|systems engineer|ai engineer|ai application engineer|application engineer|python developer|web developer|programmer)\b",
+    r"\b(laravel|php|golang|go developer|go backend|vue|fullstack|full stack|backend|software engineer|product engineer|platform engineer|infrastructure engineer|core engineer|core developer|systems engineer|ai engineer|ai application engineer|application engineer|python developer|web developer|programmer|intern|internship|trainee|apprentice)\b",
     re.IGNORECASE,
 )
 
 # Senioritas tinggi / role non-target yang dibuang dari judul
 EXCLUDE_TITLE_REGEX = re.compile(
-    r"\b(senior|sr\.|sr |lead|principal|staff|director|head|vp|architect|chief|manager|android|ios|flutter|react native|qa |devops|sre|intern)\b",
+    r"\b(senior|sr\.|sr |lead|principal|staff|director|head|vp|architect|chief|manager|android|ios|flutter|react native|qa |devops|sre)\b",
+    re.IGNORECASE,
+)
+
+# Klausul yang mewajibkan status mahasiswa aktif atau ijazah pendidikan tinggi formal (D3/S1/degree only)
+MANDATORY_STUDENT_DEGREE_REGEX = re.compile(
+    r"\b("
+    r"must be (a )?(currently )?enrolled (in|at) (a |an )?(college|university|degree program|bachelor|master)|"
+    r"currently pursuing (a |an )?(bachelor|degree|master|phd|diploma)|"
+    r"registered as a student|"
+    r"active student status required|"
+    r"proof of enrollment required|"
+    r"for students only|"
+    r"must return to school (after|following)|"
+    r"minimum (bachelor|master|d3|s1|degree) required(?!.*or equivalent practical experience)"
+    r")\b",
     re.IGNORECASE,
 )
 
@@ -103,9 +120,9 @@ def check_eligibility(title: str, location: str, description: str, country_restr
     if US_ONLY_CLAUSE_REGEX.search(description or ""):
         return False, "Klausul izin kerja AS/Barat di deskripsi"
 
-    # 7. Pembatasan eksklusif kawasan lain di deskripsi (misal: "available across all EU/LATAM countries")
-    if "only" in desc_lower and ("eu" in desc_lower or "latam" in desc_lower or "us" in desc_lower) and not any(k in desc_lower for k in ["worldwide", "deel", "indonesia"]):
-        return False, "Pembatasan wilayah eksklusif non-ID"
+    # 8. Pengecualian magang/posisi yang mewajibkan status mahasiswa aktif atau ijazah kaku tanpa jalur ekuivalen
+    if MANDATORY_STUDENT_DEGREE_REGEX.search(description or ""):
+        return False, "Mewajibkan status mahasiswa aktif atau gelar formal kaku (bukan degree-agnostic)"
 
     return True, "OK"
 

@@ -386,6 +386,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
                   {[
                     { id: 'full_time', label: 'Full-time' },
                     { id: 'contract', label: 'Kontrak Internasional / EOR' },
+                    { id: 'internship', label: 'Internship / Magang' },
                     { id: 'part_time', label: 'Part-time' },
                     { id: 'freelance', label: 'Freelance' }
                   ].map((emp) => {

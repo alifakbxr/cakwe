@@ -178,6 +178,30 @@ def test_strict_filtering_rules():
         python_jobs = get_all_jobs(target_role="Python", only_small_companies=True)
         assert len(python_jobs) == 0
 
+        # Test 4: Internship role filtering
+        intern_job = JobRequisition(
+            source="test",
+            id="job-6-intern-open",
+            title="Software Engineering Intern (Degree Agnostic)",
+            company_name="Creative Studio",
+            location="Remote Worldwide",
+            description="We welcome bootcamp grads and self-taught developers. No university degree required.",
+            published_at=1792260000,
+            intelligence=make_dummy_intel(
+                EligibilityStatus.VERIFIED_ELIGIBLE,
+                "Remote worldwide via EOR Deel",
+                CompanySizeCategory.SMALL_STARTUP,
+                "team of 15",
+                SizeConfidence.CONFIRMED,
+                88
+            )
+        )
+        save_job(intern_job)
+
+        intern_feed = get_all_jobs(target_role="Intern", only_small_companies=True)
+        assert len(intern_feed) == 1
+        assert intern_feed[0]["id"] == "job-6-intern-open"
+
         print("\nAll strict filtering assertions passed successfully!")
 
     finally:
