@@ -1,6 +1,8 @@
 import React from 'react'
 import { EyeOff, X } from 'lucide-react'
 import type { Job } from '../types'
+import { Card } from './ui/card'
+import { Button } from './ui/button'
 
 interface DismissModalProps {
   job: Job
@@ -28,8 +30,8 @@ export const DismissModal: React.FC<DismissModalProps> = ({
   ]
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[#0f172a] border border-slate-800 rounded-xl w-full max-w-md p-6 shadow-2xl space-y-4">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in-0">
+      <Card className="bg-[#0f172a] border-slate-800 w-full max-w-md p-6 shadow-2xl space-y-4">
         <div className="flex items-center justify-between border-b border-slate-800 pb-3">
           <div>
             <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
@@ -40,12 +42,14 @@ export const DismissModal: React.FC<DismissModalProps> = ({
               {job.title} — {job.company_name}
             </p>
           </div>
-          <button 
+          <Button 
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-lg"
+            className="text-slate-400 hover:text-white"
           >
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
 
         <div className="space-y-3">
@@ -56,7 +60,7 @@ export const DismissModal: React.FC<DismissModalProps> = ({
             {reasons.map((item) => (
               <label 
                 key={item.id}
-                className={`flex items-center gap-2.5 p-2.5 rounded-lg border text-xs cursor-pointer transition ${
+                className={`flex items-center gap-2.5 p-2.5 rounded-lg border text-xs cursor-pointer transition select-none ${
                   dismissReason === item.id 
                     ? 'bg-red-950/40 border-red-800 text-white font-medium' 
                     : 'bg-slate-950 border-slate-800/80 text-slate-400 hover:border-slate-700'
@@ -77,20 +81,22 @@ export const DismissModal: React.FC<DismissModalProps> = ({
         </div>
 
         <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={onClose}
-            className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition"
           >
             Batal
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
             onClick={onDismiss}
-            className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-500 text-white transition shadow-sm"
           >
             Sembunyikan & Simpan Feedback
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
     </div>
   )
 }

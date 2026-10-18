@@ -3,9 +3,13 @@ import {
   Bookmark, 
   Sparkles, 
   ExternalLink, 
-  Clock 
+  Clock,
+  Kanban as KanbanIcon
 } from 'lucide-react'
 import type { Job } from '../types'
+import { Card } from './ui/card'
+import { Button } from './ui/button'
+import { Badge } from './ui/badge'
 
 interface KanbanBoardProps {
   jobs: Job[]
@@ -26,12 +30,12 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   const [dragOverCol, setDragOverCol] = React.useState<string | null>(null)
 
   const columns = [
-    { id: 'saved', label: 'Wishlist / Saved', color: 'border-amber-500/40 text-amber-300 bg-amber-500/10' },
-    { id: 'applied', label: 'Applied', color: 'border-blue-500/40 text-blue-300 bg-blue-500/10' },
-    { id: 'interviewing', label: 'Interviewing', color: 'border-purple-500/40 text-purple-300 bg-purple-500/10' },
-    { id: 'assessment', label: 'Assessment', color: 'border-cyan-500/40 text-cyan-300 bg-cyan-500/10' },
-    { id: 'offer', label: 'Offer Received', color: 'border-emerald-500/40 text-emerald-300 bg-emerald-500/10' },
-    { id: 'rejected', label: 'Rejected', color: 'border-slate-700 text-slate-400 bg-slate-800/40' },
+    { id: 'saved', label: 'Wishlist / Saved', badgeVariant: 'amber' as const },
+    { id: 'applied', label: 'Applied', badgeVariant: 'blue' as const },
+    { id: 'interviewing', label: 'Interviewing', badgeVariant: 'indigo' as const },
+    { id: 'assessment', label: 'Assessment', badgeVariant: 'indigo' as const },
+    { id: 'offer', label: 'Offer Received', badgeVariant: 'default' as const },
+    { id: 'rejected', label: 'Rejected', badgeVariant: 'secondary' as const },
   ]
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
@@ -55,11 +59,12 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-6">
       {/* Kanban Header Summary */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 bg-[#0f172a] border border-slate-800 p-4 rounded-xl">
+      <Card className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-[#0f172a] border-slate-800">
         <div>
           <h2 className="text-base font-bold text-white flex items-center gap-2">
+            <KanbanIcon className="w-4 h-4 text-emerald-400" />
             <span>Job Tracker Kanban Board</span>
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
@@ -71,7 +76,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
           <span>Total Aktif:</span>
           <span className="text-emerald-400 font-bold">{jobs.filter(j => j.application_status).length} Lowongan Terlacak</span>
         </div>
-      </div>
+      </Card>
 
       {/* Columns Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 items-start">
@@ -91,9 +96,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
             >
               {/* Column Title Bar */}
               <div className="p-3 border-b border-slate-800 flex items-center justify-between">
-                <span className={`text-xs font-bold px-2 py-0.5 rounded-md border ${col.color}`}>
+                <Badge variant={col.badgeVariant} className="text-xs font-bold">
                   {col.label}
-                </span>
+                </Badge>
                 <span className="text-xs font-mono font-bold text-slate-400 bg-slate-900 px-2 py-0.5 rounded-full border border-slate-800">
                   {colJobs.length}
                 </span>
@@ -107,11 +112,11 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                   </div>
                 ) : (
                   colJobs.map((job) => (
-                    <div
+                    <Card
                       key={job.id}
                       draggable
                       onDragStart={(e) => handleDragStart(e, job.id)}
-                      className={`p-3 rounded-lg bg-[#141e33] border border-slate-700/60 hover:border-indigo-500/80 transition-all cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md ${
+                      className={`p-3 bg-[#141e33] border-slate-700/60 hover:border-indigo-500/80 transition-all cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md ${
                         draggedJobId === job.id ? 'opacity-40' : 'opacity-100'
                       }`}
                     >
@@ -121,9 +126,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                           {job.company_name}
                         </span>
                         {job.match_score !== undefined && job.match_score !== null && (
-                          <span className="px-1.5 py-0.2 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-500/50 text-[10px] font-bold">
+                          <Badge variant="default" className="text-[10px] font-bold px-1.5 py-0">
                             {job.match_score}%
-                          </span>
+                          </Badge>
                         )}
                       </div>
 
@@ -134,18 +139,18 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
                       {/* Metadata Chips */}
                       <div className="flex flex-wrap gap-1 mb-2.5 text-[10px]">
-                        <span className="px-1.5 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-800">
+                        <Badge variant="outline" className="text-[10px] font-normal">
                           {job.location || 'Remote'}
-                        </span>
+                        </Badge>
                         {job.company_size_category === 'small_startup' && (
-                          <span className="px-1.5 py-0.5 rounded bg-blue-950/70 text-blue-300 border border-blue-800/50">
+                          <Badge variant="blue" className="text-[10px] font-normal">
                             10-50 staff
-                          </span>
+                          </Badge>
                         )}
                         {job.company_size_category === 'agency_studio' && (
-                          <span className="px-1.5 py-0.5 rounded bg-purple-950/70 text-purple-300 border border-purple-800/50">
+                          <Badge variant="secondary" className="text-[10px] font-normal">
                             Agency
-                          </span>
+                          </Badge>
                         )}
                       </div>
 
@@ -171,7 +176,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                         <select
                           value={job.application_status || 'saved'}
                           onChange={(e) => onUpdateStatus(job.id, e.target.value)}
-                          className="bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 text-[10px] text-slate-300 focus:outline-none focus:border-indigo-500"
+                          className="bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 text-[10px] text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer"
                         >
                           <option value="saved">Wishlist</option>
                           <option value="applied">Applied</option>
@@ -182,32 +187,42 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                         </select>
 
                         <div className="flex items-center gap-1">
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => onOpenTrackerModal(job)}
-                            className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                            className="h-6 w-6 text-slate-400 hover:text-white"
                             title="Edit notes & details"
                           >
-                            <Bookmark className="w-3.5 h-3.5" />
-                          </button>
-                          <button
+                            <Bookmark className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            variant="primary"
+                            size="icon"
                             onClick={() => onOpenATSBuilder(job)}
-                            className="p-1 rounded bg-indigo-950/60 border border-indigo-700/60 text-indigo-300 hover:bg-indigo-900 transition"
+                            className="h-6 w-6 bg-indigo-950/60 border border-indigo-700/60 text-indigo-300 hover:bg-indigo-900"
                             title="Generate ATS Resume"
                           >
-                            <Sparkles className="w-3.5 h-3.5" />
-                          </button>
-                          <a
-                            href={getApplicationUrl(job)}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="p-1 rounded bg-slate-800 text-slate-300 hover:text-white transition"
+                            <Sparkles className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            asChild
+                            variant="secondary"
+                            size="icon"
+                            className="h-6 w-6 text-slate-300 hover:text-white"
                             title="Open vacancy link"
                           >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </a>
+                            <a
+                              href={getApplicationUrl(job)}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </Button>
                         </div>
                       </div>
-                    </div>
+                    </Card>
                   ))
                 )}
               </div>

@@ -16,6 +16,10 @@ import {
   ChevronUp
 } from 'lucide-react'
 import type { UserPreferences } from '../types'
+import { Card } from './ui/card'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Badge } from './ui/badge'
 
 interface SettingsViewProps {
   onPreferencesUpdated?: () => void
@@ -193,7 +197,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12">
       {/* Top Header Card */}
-      <div className="bg-[#0f172a] border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <Card className="bg-[#0f172a] border-slate-800 p-5 sm:p-6 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
             <Sliders className="w-6 h-6" />
@@ -202,9 +206,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-bold text-white tracking-tight">Preferences & Discovery Settings</h1>
               {hasUnsavedChanges && (
-                <span className="text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full animate-pulse">
+                <Badge variant="amber" className="animate-pulse">
                   Perubahan Belum Disimpan
-                </span>
+                </Badge>
               )}
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
@@ -215,36 +219,42 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
 
         {/* Global Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleReset}
             disabled={saving}
-            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-semibold transition flex items-center gap-1.5"
+            className="gap-1.5"
             title="Kembalikan semua nilai ke default"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset Default</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={handleRerunDiscovery}
             disabled={syncing}
-            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition flex items-center gap-1.5"
+            className="gap-1.5"
             title="Jalankan sinkronisasi dengan kriteria saat ini"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin text-indigo-400' : ''}`} />
             <span>Rerun Discovery</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant="default"
+            size="sm"
             onClick={handleSave}
             disabled={saving || !hasUnsavedChanges}
-            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-semibold shadow-md transition flex items-center gap-1.5"
+            className="gap-1.5 shadow-md"
           >
             {saving ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
             <span>Simpan Perubahan</span>
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
 
       {/* Feedback Banner */}
       {feedback && (
@@ -297,20 +307,22 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
                 ))}
               </div>
               <div className="flex gap-2">
-                <input
+                <Input
                   type="text"
                   placeholder="Tambah target peran (contoh: Golang Engineer)..."
                   value={newRoleInput}
                   onChange={(e) => setNewRoleInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') addTag('target_roles', newRoleInput, setNewRoleInput) }}
-                  className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500"
+                  className="flex-1"
                 />
-                <button
+                <Button
+                  size="sm"
+                  variant="secondary"
                   onClick={() => addTag('target_roles', newRoleInput, setNewRoleInput)}
-                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1"
+                  className="gap-1 h-9"
                 >
                   <Plus className="w-3.5 h-3.5" /> Tambah
-                </button>
+                </Button>
               </div>
             </div>
 

@@ -8,12 +8,15 @@ import {
   ExternalLink, 
   Bookmark, 
   Sparkles, 
-  EyeOff,
-  ShieldCheck,
-  Check,
-  AlertTriangle
+  EyeOff, 
+  ShieldCheck, 
+  Check, 
+  AlertTriangle 
 } from 'lucide-react'
 import type { Job } from '../types'
+import { Card } from './ui/card'
+import { Button } from './ui/button'
+import { Badge } from './ui/badge'
 
 interface JobCardProps {
   job: Job
@@ -37,7 +40,7 @@ export const JobCard: React.FC<JobCardProps> = ({
   const isClosed = job.lifecycle_status === 'closed'
 
   return (
-    <article className={`rounded-xl border transition-all duration-200 ${
+    <Card className={`transition-all duration-200 overflow-hidden ${
       isClosed 
         ? 'bg-slate-900/30 border-slate-800/60 opacity-70' 
         : 'bg-[#0f172a]/90 border-slate-800 hover:border-slate-700 shadow-sm'
@@ -53,14 +56,14 @@ export const JobCard: React.FC<JobCardProps> = ({
                 {job.company_name}
               </span>
 
-              <span className="px-2 py-0.5 rounded-md bg-slate-950 text-slate-400 border border-slate-800 text-[10px] uppercase font-mono tracking-wider">
+              <Badge variant="outline" className="text-[10px] uppercase font-mono tracking-wider">
                 {job.source}
-              </span>
+              </Badge>
 
               {isClosed && (
-                <span className="px-2 py-0.5 rounded-md bg-red-950/60 text-red-300 border border-red-800/60 text-[10px] font-bold uppercase">
+                <Badge variant="destructive" className="text-[10px] font-bold uppercase">
                   Closed
-                </span>
+                </Badge>
               )}
 
               <span className="text-slate-600">•</span>
@@ -72,40 +75,37 @@ export const JobCard: React.FC<JobCardProps> = ({
 
               {/* Company Size Badge */}
               {job.company_size_category === 'small_startup' && (
-                <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-950/70 text-blue-300 border border-blue-800/50 text-[11px] font-medium">
+                <Badge variant="blue" className="gap-1 text-[11px] font-medium">
                   <Building className="w-3 h-3" />
                   Small Team (10–50)
-                </span>
+                </Badge>
               )}
               {job.company_size_category === 'medium_startup' && (
-                <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-cyan-950/70 text-cyan-300 border border-cyan-800/50 text-[11px] font-medium">
+                <Badge variant="indigo" className="gap-1 text-[11px] font-medium">
                   <Building className="w-3 h-3" />
                   Scaleup (51–100)
-                </span>
+                </Badge>
               )}
               {job.company_size_category === 'agency_studio' && (
-                <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-950/70 text-purple-300 border border-purple-800/50 text-[11px] font-medium">
+                <Badge variant="secondary" className="gap-1 text-[11px] font-medium">
                   <Building className="w-3 h-3" />
                   Digital Studio / Agency
-                </span>
+                </Badge>
               )}
               {job.primary_industry && job.primary_industry !== 'unknown' && (
-                <span className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 text-[11px] font-medium capitalize">
+                <Badge variant="secondary" className="text-[11px] font-medium capitalize">
                   {job.primary_industry}
-                </span>
+                </Badge>
               )}
 
               {/* Match Score */}
               {job.match_score !== undefined && job.match_score !== null && (
-                <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold border ${
-                  job.match_score >= 80
-                    ? 'bg-emerald-950/80 border-emerald-500/80 text-emerald-300'
-                    : job.match_score >= 60
-                    ? 'bg-amber-950/80 border-amber-500/80 text-amber-300'
-                    : 'bg-slate-800 border-slate-700 text-slate-400'
-                }`}>
+                <Badge
+                  variant={job.match_score >= 80 ? "default" : job.match_score >= 60 ? "amber" : "secondary"}
+                  className="text-[11px] font-bold"
+                >
                   {job.match_score}% Candidate Fit
-                </span>
+                </Badge>
               )}
 
               {job.min_salary && (
@@ -135,56 +135,66 @@ export const JobCard: React.FC<JobCardProps> = ({
             )}
           </div>
 
-          {/* Quick Action Buttons */}
+          {/* Quick Action Buttons with shadcn Button */}
           <div className="flex flex-wrap items-center gap-2 lg:self-center shrink-0">
-            {/* Tracker status pill */}
-            <button
+            {/* Tracker status button */}
+            <Button
+              size="sm"
+              variant={
+                job.application_status === 'applied' ? 'default' :
+                job.application_status === 'interviewing' ? 'primary' :
+                job.application_status === 'saved' ? 'outline' : 'secondary'
+              }
               onClick={() => onOpenTracker(job)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
-                job.application_status === 'applied'
-                  ? 'bg-emerald-950/60 border-emerald-600 text-emerald-300'
-                  : job.application_status === 'interviewing'
-                  ? 'bg-purple-950/60 border-purple-600 text-purple-300'
-                  : job.application_status === 'saved'
-                  ? 'bg-amber-950/60 border-amber-600 text-amber-300'
-                  : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-700'
-              }`}
+              className="gap-1.5"
             >
               <Bookmark className="w-3.5 h-3.5" />
-              {job.application_status === 'applied' ? 'Applied' :
-               job.application_status === 'interviewing' ? 'Interview' :
-               job.application_status === 'saved' ? 'Saved' : '+ Track'}
-            </button>
+              <span>
+                {job.application_status === 'applied' ? 'Applied' :
+                 job.application_status === 'interviewing' ? 'Interview' :
+                 job.application_status === 'saved' ? 'Saved' : '+ Track'}
+              </span>
+            </Button>
 
             {/* ATS Tailor Button */}
-            <button
+            <Button
+              size="sm"
+              variant="primary"
               onClick={() => onOpenATSBuilder(job)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition shadow-sm"
+              className="gap-1.5 shadow-sm"
               title="Generate ATS Resume & Tailored Cover Letter"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>ATS Resume Studio</span>
-            </button>
+            </Button>
 
             {/* External Direct Apply */}
-            <a
-              href={getApplicationUrl(job)}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition"
+            <Button
+              asChild
+              size="sm"
+              variant="default"
+              className="gap-1.5"
             >
-              <span>Apply</span>
-              <ExternalLink className="w-3 h-3" />
-            </a>
+              <a
+                href={getApplicationUrl(job)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span>Apply</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </Button>
 
             {/* Sembunyikan/Dismiss Button */}
-            <button
+            <Button
+              size="icon"
+              variant="outline"
               onClick={() => onOpenDismiss(job)}
-              className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-red-400 hover:border-red-900/50 transition"
+              className="text-slate-400 hover:text-red-400 hover:border-red-900/50"
               title="Hide / Dismiss this job"
             >
               <EyeOff className="w-3.5 h-3.5" />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -210,9 +220,9 @@ export const JobCard: React.FC<JobCardProps> = ({
           <div className="mt-3 flex flex-wrap gap-1.5 items-center">
             <span className="text-[11px] text-slate-400 mr-1">Skills:</span>
             {job.skills_required.map((skill, i) => (
-              <span key={i} className="px-2 py-0.5 rounded bg-slate-950 text-slate-300 border border-slate-800 text-[11px]">
+              <Badge key={i} variant="outline" className="text-[11px] font-normal bg-slate-950/80">
                 {skill}
-              </span>
+              </Badge>
             ))}
           </div>
         )}
@@ -221,7 +231,7 @@ export const JobCard: React.FC<JobCardProps> = ({
       {/* Accordion Expand / Collapse Button */}
       <button
         onClick={onToggleExpand}
-        className="w-full py-2 px-4 bg-slate-950/60 hover:bg-slate-950 border-t border-slate-800/80 rounded-b-xl text-xs font-medium text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5 transition"
+        className="w-full py-2 px-4 bg-slate-950/60 hover:bg-slate-950 border-t border-slate-800/80 text-xs font-medium text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5 transition cursor-pointer select-none"
       >
         {isExpanded ? (
           <>
@@ -238,7 +248,7 @@ export const JobCard: React.FC<JobCardProps> = ({
 
       {/* Expanded Details Section */}
       {isExpanded && (
-        <div className="p-5 border-t border-slate-800 bg-slate-950/40 rounded-b-xl space-y-5 text-xs text-slate-300">
+        <div className="p-5 border-t border-slate-800 bg-slate-950/40 space-y-5 text-xs text-slate-300">
           
           {/* Fit Reasons & Gap Analysis */}
           {(job.match_reasons || job.missing_skills) && (
@@ -313,6 +323,6 @@ export const JobCard: React.FC<JobCardProps> = ({
           </div>
         </div>
       )}
-    </article>
+    </Card>
   )
 }

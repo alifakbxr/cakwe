@@ -12,6 +12,9 @@ import {
   Calendar
 } from 'lucide-react'
 import type { Job, Stats } from '../types'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/card'
+import { Button } from './ui/button'
+import { Badge } from './ui/badge'
 
 interface DashboardViewProps {
   stats: Stats | null
@@ -35,17 +38,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const topRecommendations = jobs
     .filter(j => j.eligibility_status === 'verified_eligible' && (!j.lifecycle_status || j.lifecycle_status === 'active'))
-    .slice(0, 4)
+    .slice(0, 5)
 
   return (
     <div className="space-y-6">
-      {/* Welcome Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-[#0f172a] to-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-lg">
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-3">
-            <ShieldCheck className="w-4 h-4" />
+      {/* Welcome Hero Card */}
+      <Card className="relative overflow-hidden border-slate-800 bg-gradient-to-r from-slate-900 via-[#0f172a] to-slate-900 shadow-lg">
+        <div className="relative z-10 p-6 sm:p-8 max-w-3xl">
+          <Badge variant="default" className="gap-1.5 px-3 py-1 text-xs mb-3 font-semibold">
+            <ShieldCheck className="w-3.5 h-3.5" />
             <span>Strict Verified Worldwide & Small Companies</span>
-          </div>
+          </Badge>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight leading-tight">
             Pusat Komando Karir Remote Global
           </h1>
@@ -53,26 +56,30 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             Temukan lowongan kerja remote 100% yang menerima kandidat dari Indonesia, kelola progres lamaran dalam Kanban board terstruktur, dan optimasi resume berstandar Harvard/MIT.
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-3">
-            <button
+            <Button
               onClick={() => onNavigateTab('RADAR')}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-md transition flex items-center gap-2"
+              variant="default"
+              size="default"
+              className="gap-2 font-semibold shadow-md"
             >
               <span>Jelajahi Lowongan Terverifikasi</span>
               <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => onNavigateTab('KANBAN')}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs transition flex items-center gap-2"
+              variant="secondary"
+              size="default"
+              className="gap-2 font-semibold"
             >
               <span>Buka Kanban Pipeline ({trackedJobs.length})</span>
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
 
-      {/* 4 Stat Cards Grid */}
+      {/* 4 Stat Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-4 shadow-sm">
+        <Card className="p-4 bg-[#0f172a] border-slate-800">
           <div className="flex items-center justify-between text-slate-400 text-xs">
             <span>Verified Small Co (10-100)</span>
             <Building className="w-4 h-4 text-blue-400" />
@@ -81,9 +88,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {stats?.verified_small_company_jobs ?? 0}
           </div>
           <div className="text-[11px] text-slate-500 mt-1">Boutique, Studios & Startups</div>
-        </div>
+        </Card>
 
-        <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-4 shadow-sm">
+        <Card className="p-4 bg-[#0f172a] border-slate-800">
           <div className="flex items-center justify-between text-slate-400 text-xs">
             <span>Indonesia Verified</span>
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
@@ -92,9 +99,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {stats?.verified_eligible_jobs ?? 0}
           </div>
           <div className="text-[11px] text-slate-500 mt-1">Bukti kontrak EOR / Global</div>
-        </div>
+        </Card>
 
-        <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-4 shadow-sm">
+        <Card className="p-4 bg-[#0f172a] border-slate-800">
           <div className="flex items-center justify-between text-slate-400 text-xs">
             <span>Total Lamaran Aktif</span>
             <Bookmark className="w-4 h-4 text-indigo-400" />
@@ -105,9 +112,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="text-[11px] text-slate-500 mt-1">
             {appliedJobs.length} Applied • {interviewJobs.length} Interviewing
           </div>
-        </div>
+        </Card>
 
-        <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-4 shadow-sm">
+        <Card className="p-4 bg-[#0f172a] border-slate-800">
           <div className="flex items-center justify-between text-slate-400 text-xs">
             <span>Total Peluang Dipantau</span>
             <TrendingUp className="w-4 h-4 text-amber-400" />
@@ -116,7 +123,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {stats?.total_jobs ?? 0}
           </div>
           <div className="text-[11px] text-slate-500 mt-1">Multi-ATS Public Feeds</div>
-        </div>
+        </Card>
       </div>
 
       {/* Main Two-Column Layout */}
@@ -124,93 +131,106 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         
         {/* Left Column: Top Curated Job Recommendations */}
         <div className="lg:col-span-8 space-y-4">
-          <div className="flex items-center justify-between bg-[#0f172a] border border-slate-800 p-4 rounded-xl">
-            <div>
-              <h2 className="text-sm font-bold text-white">Rekomendasi Utama Terverifikasi</h2>
-              <p className="text-xs text-slate-400">Peluang kerja remote dengan bukti kelayakan tertinggi untuk profil Anda.</p>
-            </div>
-            <button
-              onClick={() => onNavigateTab('RADAR')}
-              className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1"
-            >
-              <span>Lihat Semua</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {topRecommendations.length === 0 ? (
-              <div className="text-center py-12 bg-[#0f172a] border border-slate-800 rounded-xl p-6">
-                <p className="text-xs text-slate-400">Belum ada rekomendasi aktif. Jalankan sinkronisasi untuk memuat lowongan terbaru.</p>
+          <Card className="border-slate-800 bg-[#0f172a]">
+            <CardHeader className="flex flex-row items-center justify-between p-4 pb-3">
+              <div>
+                <CardTitle className="text-sm font-bold text-white">Rekomendasi Utama Terverifikasi</CardTitle>
+                <CardDescription className="text-xs text-slate-400">Peluang kerja remote dengan bukti kelayakan tertinggi untuk profil Anda.</CardDescription>
               </div>
-            ) : (
-              topRecommendations.map((job) => (
-                <div 
-                  key={job.id}
-                  className="bg-[#0f172a] border border-slate-800 hover:border-slate-700 rounded-xl p-4 sm:p-5 transition flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                >
-                  <div className="space-y-1.5 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap text-xs">
-                      <span className="font-bold text-white text-sm">{job.company_name}</span>
-                      <span className="text-slate-600">•</span>
-                      <span className="text-slate-400 flex items-center gap-1 text-[11px]">
-                        <MapPin className="w-3 h-3 text-slate-500" />
-                        {job.location || 'Remote Worldwide'}
-                      </span>
-                      {job.match_score !== undefined && job.match_score !== null && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-600">
-                          {job.match_score}% Fit
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onNavigateTab('RADAR')}
+                className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold gap-1 h-8 px-2"
+              >
+                <span>Lihat Semua</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Button>
+            </CardHeader>
+            <CardContent className="p-4 pt-1 space-y-3">
+              {topRecommendations.length === 0 ? (
+                <div className="text-center py-10 rounded-lg bg-slate-950/60 border border-slate-800/80 p-6">
+                  <p className="text-xs text-slate-400">Belum ada rekomendasi aktif. Jalankan sinkronisasi untuk memuat lowongan terbaru.</p>
+                </div>
+              ) : (
+                topRecommendations.map((job) => (
+                  <div 
+                    key={job.id}
+                    className="bg-slate-950 border border-slate-800/80 hover:border-slate-700 rounded-xl p-4 transition flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  >
+                    <div className="space-y-1.5 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap text-xs">
+                        <span className="font-bold text-white text-sm">{job.company_name}</span>
+                        <span className="text-slate-600">•</span>
+                        <span className="text-slate-400 flex items-center gap-1 text-[11px]">
+                          <MapPin className="w-3 h-3 text-slate-500" />
+                          {job.location || 'Remote Worldwide'}
                         </span>
+                        {job.match_score !== undefined && job.match_score !== null && (
+                          <Badge variant="default" className="text-[10px] font-bold">
+                            {job.match_score}% Fit
+                          </Badge>
+                        )}
+                        {job.primary_industry && job.primary_industry !== 'unknown' && (
+                          <Badge variant="secondary" className="capitalize text-[10px]">
+                            {job.primary_industry}
+                          </Badge>
+                        )}
+                      </div>
+                      <h3 className="text-sm font-bold text-slate-200">{job.title}</h3>
+                      {job.eligibility_quote && (
+                        <p className="text-xs text-emerald-300/90 italic line-clamp-1">
+                          "{job.eligibility_quote}"
+                        </p>
                       )}
                     </div>
-                    <h3 className="text-sm font-bold text-slate-200">{job.title}</h3>
-                    {job.eligibility_quote && (
-                      <p className="text-xs text-emerald-300/90 italic line-clamp-1">
-                        "{job.eligibility_quote}"
-                      </p>
-                    )}
-                  </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      onClick={() => onOpenATSStudio(job)}
-                      className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition flex items-center gap-1.5"
-                    >
-                      <FileText className="w-3.5 h-3.5" />
-                      <span>ATS CV</span>
-                    </button>
-                    <button
-                      onClick={() => onOpenTracker(job)}
-                      className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition"
-                    >
-                      Track
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={() => onOpenATSStudio(job)}
+                        className="gap-1.5"
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>ATS CV</span>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => onOpenTracker(job)}
+                      >
+                        Track
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ))
-            )}
-          </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Right Column: Tracker Pipeline Snapshot & Quick Actions */}
         <div className="lg:col-span-4 space-y-4">
           {/* Tracker Activity Snapshot */}
-          <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-4 space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+          <Card className="border-slate-800 bg-[#0f172a]">
+            <CardHeader className="flex flex-row items-center justify-between p-4 pb-2 border-b border-slate-800/80">
+              <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                 <Bookmark className="w-3.5 h-3.5 text-indigo-400" />
                 Status Pipeline Lamaran
-              </h3>
-              <button
+              </CardTitle>
+              <Button
+                variant="link"
+                size="sm"
                 onClick={() => onNavigateTab('KANBAN')}
-                className="text-[11px] text-indigo-400 hover:underline font-medium"
+                className="text-[11px] text-indigo-400 hover:text-indigo-300 p-0 h-auto"
               >
                 Buka Board
-              </button>
-            </div>
+              </Button>
+            </CardHeader>
 
-            <div className="space-y-2 text-xs">
-              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-950 border border-slate-800/80">
+            <CardContent className="p-4 space-y-2 text-xs">
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
                 <span className="text-amber-300 flex items-center gap-1.5 font-medium">
                   <Bookmark className="w-3.5 h-3.5" />
                   Wishlist / Saved
@@ -218,7 +238,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <span className="font-bold text-white">{savedJobs.length}</span>
               </div>
 
-              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-950 border border-slate-800/80">
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
                 <span className="text-blue-300 flex items-center gap-1.5 font-medium">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   Applied
@@ -226,26 +246,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <span className="font-bold text-white">{appliedJobs.length}</span>
               </div>
 
-              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-950 border border-slate-800/80">
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
                 <span className="text-purple-300 flex items-center gap-1.5 font-medium">
                   <Calendar className="w-3.5 h-3.5" />
                   Interviewing
                 </span>
                 <span className="font-bold text-white">{interviewJobs.length}</span>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          {/* Quick Guidance Box */}
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 space-y-2 text-xs">
-            <span className="font-bold text-white flex items-center gap-1.5">
+          {/* Quick System Information Box */}
+          <Card className="border-slate-800/80 bg-slate-950 p-4 space-y-2">
+            <span className="font-bold text-white flex items-center gap-1.5 text-xs">
               <Clock className="w-3.5 h-3.5 text-emerald-400" />
               Siklus Poller Otomatis:
             </span>
             <p className="text-slate-400 leading-relaxed text-[11px]">
-              Sistem secara otomatis menarik lowongan baru setiap 5 jam dari 66+ ATS board aktif. Hanya posisi dengan bukti kontrak EOR/Worldwide dan terbit dalam 14 hari terakhir yang ditampilkan.
+              Sistem secara otomatis menarik lowongan baru setiap 5 jam dari board ATS publik yang terverifikasi. Hanya posisi dengan bukti kontrak EOR/Worldwide dan terbit dalam 14 hari terakhir yang ditampilkan.
             </p>
-          </div>
+          </Card>
         </div>
 
       </div>

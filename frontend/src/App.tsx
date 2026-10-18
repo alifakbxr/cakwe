@@ -26,6 +26,9 @@ import { ATSStudioModal } from './components/ATSStudioModal'
 import { TrackerModal } from './components/TrackerModal'
 import { DismissModal } from './components/DismissModal'
 import { SettingsView } from './components/SettingsView'
+import { Button } from './components/ui/button'
+import { Card } from './components/ui/card'
+import { Input } from './components/ui/input'
 
 export default function App() {
   const [jobs, setJobs] = useState<Job[]>([])
@@ -519,7 +522,7 @@ export default function App() {
       {/* View: Resume Studio Standalone Tab */}
       {currentTab === 'RESUME_STUDIO' && (
         <div className="space-y-6">
-          <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-5 sm:p-6">
+          <Card className="bg-[#0f172a] border-slate-800 p-5 sm:p-6">
             <h2 className="text-base font-bold text-white flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-indigo-400" />
               ATS Resume & Cover Letter Studio
@@ -530,7 +533,7 @@ export default function App() {
 
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {jobs.slice(0, 6).map((job) => (
-                <div 
+                <Card 
                   key={job.id} 
                   onClick={() => {
                     setActiveJobForBuilder(job)
@@ -540,7 +543,7 @@ export default function App() {
                     setDocumentView('RESUME')
                     loadHistory(job.id)
                   }}
-                  className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-indigo-500 cursor-pointer transition flex flex-col justify-between"
+                  className="p-3.5 bg-slate-950 border-slate-800 hover:border-indigo-500 cursor-pointer transition flex flex-col justify-between"
                 >
                   <div>
                     <span className="text-[11px] font-semibold text-slate-400">{job.company_name}</span>
@@ -552,10 +555,10 @@ export default function App() {
                       Buka Studio &rarr;
                     </span>
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
-          </div>
+          </Card>
         </div>
       )}
 
@@ -591,7 +594,7 @@ export default function App() {
           {/* Stats Bar */}
           {stats && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-4">
+              <Card className="p-4 bg-[#0f172a] border-slate-800">
                 <div className="text-xs text-indigo-400 font-medium flex items-center gap-1.5">
                   <Building className="w-4 h-4" />
                   Verified Small Companies (10–100)
@@ -600,54 +603,52 @@ export default function App() {
                   {stats.verified_small_company_jobs ?? stats.verified_eligible_jobs}
                 </div>
                 <div className="text-[11px] text-slate-500 mt-1">Boutique, Studios, & Startups</div>
-              </div>
+              </Card>
 
-              <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-4">
+              <Card className="p-4 bg-[#0f172a] border-slate-800">
                 <div className="text-xs text-emerald-400 font-medium flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4" />
                   Terverifikasi Domisili Indonesia
                 </div>
                 <div className="text-2xl font-bold text-emerald-400 mt-1">{stats.verified_eligible_jobs}</div>
                 <div className="text-[11px] text-slate-500 mt-1">Berdasarkan bukti kontrak EOR / Global</div>
-              </div>
+              </Card>
 
-              <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-4">
+              <Card className="p-4 bg-[#0f172a] border-slate-800">
                 <div className="text-xs text-slate-400 font-medium">Total Lowongan Terpantau</div>
                 <div className="text-2xl font-bold text-white mt-1">{stats.total_jobs}</div>
                 <div className="text-[11px] text-slate-500 mt-1">Multi-ATS Public Feeds (14 Hari)</div>
-              </div>
+              </Card>
             </div>
           )}
 
           {/* Search, Roles, and Strict Filter Controls */}
-          <div className="bg-[#0f172a] border border-slate-800 rounded-xl p-4 space-y-4">
+          <Card className="bg-[#0f172a] border-slate-800 p-4 space-y-4">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               {/* Role filter pills */}
               <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
                 {roles.map(r => (
-                  <button
+                  <Button
                     key={r.value}
+                    size="sm"
+                    variant={selectedRole === r.value ? "default" : "outline"}
                     onClick={() => setSelectedRole(r.value)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition ${
-                      selectedRole === r.value 
-                        ? 'bg-emerald-600 text-white font-semibold shadow-sm' 
-                        : 'bg-slate-950 text-slate-300 hover:bg-slate-800 border border-slate-800'
-                    }`}
+                    className="whitespace-nowrap h-8"
                   >
                     {r.label}
-                  </button>
+                  </Button>
                 ))}
               </div>
 
-              {/* Search input */}
+              {/* Search input with shadcn Input */}
               <div className="relative w-full sm:w-80">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                <input 
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 z-10" />
+                <Input 
                   type="text"
                   placeholder="Cari posisi, skill, perusahaan..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                  className="pl-9 pr-3 h-9"
                 />
               </div>
             </div>
@@ -656,27 +657,23 @@ export default function App() {
             <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800/80">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs text-slate-400 font-medium">Status Kelayakan:</span>
-                <button
+                <Button
+                  size="sm"
+                  variant={onlyVerified ? "default" : "outline"}
                   onClick={() => setOnlyVerified(true)}
-                  className={`px-3 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition ${
-                    onlyVerified
-                      ? 'bg-emerald-600 text-white shadow-sm font-semibold'
-                      : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'
-                  }`}
+                  className="gap-1.5 h-7 text-xs"
                 >
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Verified Eligible (Indonesia Open)</span>
-                </button>
-                <button
+                </Button>
+                <Button
+                  size="sm"
+                  variant={!onlyVerified ? "secondary" : "outline"}
                   onClick={() => setOnlyVerified(false)}
-                  className={`px-3 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 transition ${
-                    !onlyVerified
-                      ? 'bg-amber-600 text-white shadow-sm font-semibold'
-                      : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'
-                  }`}
+                  className="gap-1.5 h-7 text-xs"
                 >
                   <span>Antrean Perlu Verifikasi (Needs Review)</span>
-                </button>
+                </Button>
               </div>
 
               <div className="flex items-center gap-3 text-xs text-slate-400 flex-wrap">
@@ -702,7 +699,7 @@ export default function App() {
                 </label>
               </div>
             </div>
-          </div>
+          </Card>
 
           {/* Filter Diagnostics Alert / Transparency Banner */}
           {diagnostics && (diagnostics.hidden_by_freshness > 0 || diagnostics.hidden_by_large_enterprise > 0 || (diagnostics.hidden_by_developer_platform && diagnostics.hidden_by_developer_platform > 0)) && (
@@ -718,23 +715,27 @@ export default function App() {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 {onlySmallCompanies && (
-                  <button
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => setOnlySmallCompanies(false)}
-                    className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 transition font-medium"
+                    className="h-7 text-indigo-300 border-slate-700"
                   >
                     Tampilkan Semua Kategori
-                  </button>
+                  </Button>
                 )}
-                <button
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => {
                     setSelectedRole('ALL')
                     setSearchQuery('')
                     setOnlySmallCompanies(false)
                   }}
-                  className="px-2.5 py-1 rounded bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 transition font-medium"
+                  className="h-7 bg-indigo-600/40 hover:bg-indigo-600/60 text-indigo-200 border border-indigo-500/40"
                 >
                   Reset Filter Feed
-                </button>
+                </Button>
               </div>
             </div>
           )}
