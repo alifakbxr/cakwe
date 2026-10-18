@@ -80,6 +80,9 @@ def init_db():
         ("match_reasons", "TEXT"),
         ("missing_skills", "TEXT"),
         ("dismiss_reason", "TEXT"),
+        ("primary_industry", "TEXT DEFAULT 'unknown'"),
+        ("is_developer_platform", "INTEGER DEFAULT 0"),
+        ("is_tier1", "INTEGER DEFAULT 0"),
     ]
     for col_name, col_type in new_cols:
         if col_name not in existing_cols:
@@ -90,7 +93,6 @@ def init_db():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_company ON jobs (company_id);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_match ON jobs (match_score, is_recommended);")
 
-    # Tabel Company Registry
     # Tabel Company Registry
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS companies (
@@ -105,7 +107,7 @@ def init_db():
         last_sync_at TIMESTAMP,
         last_status TEXT,
         consecutive_failures INTEGER DEFAULT 0,
-        discovery_source TEXT DEFAULT 'seed',
+        discovery_source TEXT DEFAULT 'discovered',
         verification_status TEXT DEFAULT 'verified_active',
         last_verified_at TIMESTAMP,
         active_jobs_count INTEGER DEFAULT 0,
@@ -116,12 +118,13 @@ def init_db():
     # Migrasi idempotent untuk kolom baru pada tabel companies
     existing_company_cols = [row["name"] for row in cursor.execute("PRAGMA table_info(companies)").fetchall()]
     new_company_cols = [
-        ("discovery_source", "TEXT DEFAULT 'seed'"),
+        ("discovery_source", "TEXT DEFAULT 'discovered'"),
         ("verification_status", "TEXT DEFAULT 'verified_active'"),
         ("last_verified_at", "TIMESTAMP"),
         ("active_jobs_count", "INTEGER DEFAULT 0"),
         ("size_category", "TEXT DEFAULT 'unknown'"),
         ("is_tier1", "INTEGER DEFAULT 0"),
+        ("is_developer_platform", "INTEGER DEFAULT 0"),
     ]
     for col_name, col_type in new_company_cols:
         if col_name not in existing_company_cols:
@@ -246,15 +249,26 @@ def save_job(job: JobRequisition):
     cursor = conn.cursor()
     intel = job.intelligence
 
-    # Ambil ukuran perusahaan dari ground-truth tabel companies jika ada
+    # Ambil ukuran dan klasifikasi perusahaan dari tabel companies jika ada
     size_cat = intel.company_size_category.value if intel and intel.company_size_category else "unknown"
     size_conf = intel.company_size_confidence.value if intel and intel.company_size_confidence else "unknown"
+    primary_industry = intel.primary_industry if intel and intel.primary_industry else "unknown"
+    is_dev_platform = 1 if (intel and intel.is_developer_platform) else 0
+    is_tier1 = 1 if (intel and intel.is_tier1) else 0
+
     if job.company_name:
-        cursor.execute("SELECT size_category FROM companies WHERE LOWER(name) = ? OR id = ? LIMIT 1", (job.company_name.lower().strip(), job.company_id or ""))
+        cursor.execute("SELECT size_category, is_tier1, is_developer_platform, industry FROM companies WHERE LOWER(name) = ? OR id = ? LIMIT 1", (job.company_name.lower().strip(), job.company_id or ""))
         c_row = cursor.fetchone()
-        if c_row and c_row["size_category"] and c_row["size_category"] != "unknown":
-            size_cat = c_row["size_category"]
-            size_conf = "confirmed"
+        if c_row:
+            if c_row["size_category"] and c_row["size_category"] != "unknown":
+                size_cat = c_row["size_category"]
+                size_conf = "confirmed"
+            if c_row["is_tier1"] is not None:
+                is_tier1 = 1 if c_row["is_tier1"] else 0
+            if c_row["is_developer_platform"] is not None:
+                is_dev_platform = 1 if c_row["is_developer_platform"] else 0
+            if c_row["industry"]:
+                primary_industry = c_row["industry"]
 
     cursor.execute("""
     INSERT INTO jobs (
@@ -266,7 +280,8 @@ def save_job(job: JobRequisition):
         translated_responsibilities, translated_requirements,
         skills_required, ghost_risk_score, ghost_risk_reason,
         company_size_category, company_size_raw, company_size_confidence,
-        match_score, is_recommended, match_reasons, missing_skills
+        match_score, is_recommended, match_reasons, missing_skills,
+        primary_industry, is_developer_platform, is_tier1
     ) VALUES (
         ?, ?, ?, ?, ?,
         ?, ?, ?,
@@ -276,7 +291,8 @@ def save_job(job: JobRequisition):
         ?, ?,
         ?, ?, ?,
         ?, ?, ?,
-        ?, ?, ?, ?
+        ?, ?, ?, ?,
+        ?, ?, ?
     )
     ON CONFLICT(id) DO UPDATE SET
         title = excluded.title,
@@ -290,7 +306,10 @@ def save_job(job: JobRequisition):
         match_score = excluded.match_score,
         is_recommended = excluded.is_recommended,
         match_reasons = excluded.match_reasons,
-        missing_skills = excluded.missing_skills;
+        missing_skills = excluded.missing_skills,
+        primary_industry = excluded.primary_industry,
+        is_developer_platform = excluded.is_developer_platform,
+        is_tier1 = excluded.is_tier1;
     """, (
         job.id,
         job.source,
@@ -321,6 +340,9 @@ def save_job(job: JobRequisition):
         1 if (intel and intel.candidate_fit and intel.candidate_fit.is_recommended) else 0,
         json.dumps(intel.candidate_fit.match_reasons if intel and intel.candidate_fit else []),
         json.dumps(intel.candidate_fit.missing_or_gap_skills if intel and intel.candidate_fit else []),
+        primary_industry,
+        is_dev_platform,
+        is_tier1,
     ))
 
     # Simpan history jika ada perubahan gaji atau eligibility pada job yang sudah ada
@@ -472,9 +494,12 @@ def get_all_jobs(
         else:
             query_parts.append("j.company_size_category IN ('small_startup', 'medium_startup', 'agency_studio')")
 
-    # 6. Exclude Tier-1 Enterprises (hanya jika mode small company aktif atau pengguna memilih mengecualikan tier-1)
-    if eff_only_small and preferences.exclude_tier1_enterprises:
-        query_parts.append("(j.company_size_category != 'large_enterprise' OR j.company_size_category IS NULL)")
+    # 6. Exclude Tier-1 Enterprises and Developer Platforms (hanya jika mode small company aktif atau preferensi user)
+    if eff_only_small:
+        if preferences.exclude_tier1_enterprises:
+            query_parts.append("(COALESCE(j.is_tier1, 0) = 0 AND (j.company_size_category != 'large_enterprise' OR j.company_size_category IS NULL))")
+        # Exclude Developer Tools & Platforms from primary results (prioritize independent startups across diverse domains)
+        query_parts.append("(COALESCE(j.is_developer_platform, 0) = 0)")
 
 
     # 7. Excluded Companies (Blacklist dari User)
@@ -570,7 +595,13 @@ def get_jobs_filter_diagnostics(user_id: str = "default") -> dict:
     hidden_by_large_enterprise = cursor.execute("""
         SELECT COUNT(*) FROM jobs 
         WHERE eligibility_status = 'verified_eligible' 
-        AND company_size_category = 'large_enterprise'
+        AND (company_size_category = 'large_enterprise' OR is_tier1 = 1)
+    """).fetchone()[0]
+
+    hidden_by_dev_platform = cursor.execute("""
+        SELECT COUNT(*) FROM jobs 
+        WHERE eligibility_status = 'verified_eligible' 
+        AND is_developer_platform = 1
     """).fetchone()[0]
 
     conn.close()
@@ -581,6 +612,7 @@ def get_jobs_filter_diagnostics(user_id: str = "default") -> dict:
         "ineligible": ineligible,
         "hidden_by_freshness": hidden_by_freshness,
         "hidden_by_large_enterprise": hidden_by_large_enterprise,
+        "hidden_by_developer_platform": hidden_by_dev_platform,
         "freshness_days_active": preferences.freshness_days,
         "only_small_active": preferences.only_small_companies,
     }
@@ -638,9 +670,9 @@ def upsert_company(company: dict):
     cursor.execute("""
     INSERT INTO companies (
         id, name, website_url, ats_provider, ats_board_token, industry, country, is_active,
-        discovery_source, verification_status, active_jobs_count, size_category, is_tier1
+        discovery_source, verification_status, active_jobs_count, size_category, is_tier1, is_developer_platform
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(ats_provider, ats_board_token) DO UPDATE SET
         name = excluded.name,
         website_url = COALESCE(excluded.website_url, companies.website_url),
@@ -651,7 +683,8 @@ def upsert_company(company: dict):
         verification_status = COALESCE(excluded.verification_status, companies.verification_status),
         active_jobs_count = COALESCE(excluded.active_jobs_count, companies.active_jobs_count),
         size_category = COALESCE(excluded.size_category, companies.size_category),
-        is_tier1 = COALESCE(excluded.is_tier1, companies.is_tier1);
+        is_tier1 = COALESCE(excluded.is_tier1, companies.is_tier1),
+        is_developer_platform = COALESCE(excluded.is_developer_platform, companies.is_developer_platform);
     """, (
         company["id"],
         company["name"],
@@ -661,11 +694,12 @@ def upsert_company(company: dict):
         company.get("industry", ""),
         company.get("country", ""),
         1 if company.get("is_active", True) else 0,
-        company.get("discovery_source", "seed"),
+        company.get("discovery_source", "discovered"),
         company.get("verification_status", "verified_active"),
         company.get("active_jobs_count", 0),
         company.get("size_category", "unknown"),
         1 if company.get("is_tier1", False) else 0,
+        1 if company.get("is_developer_platform", False) else 0,
     ))
     conn.commit()
     conn.close()

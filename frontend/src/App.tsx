@@ -705,22 +705,24 @@ export default function App() {
           </div>
 
           {/* Filter Diagnostics Alert / Transparency Banner */}
-          {diagnostics && (diagnostics.hidden_by_freshness > 0 || diagnostics.hidden_by_large_enterprise > 0) && (
+          {diagnostics && (diagnostics.hidden_by_freshness > 0 || diagnostics.hidden_by_large_enterprise > 0 || (diagnostics.hidden_by_developer_platform && diagnostics.hidden_by_developer_platform > 0)) && (
             <div className="bg-slate-900/90 border border-indigo-500/30 rounded-xl p-3.5 px-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2.5 text-slate-300">
                 <span className="flex h-2 w-2 rounded-full bg-indigo-400 animate-pulse" />
                 <span>
-                  Filter Aktif: Ada <strong>{diagnostics.hidden_by_freshness}</strong> lowongan terverifikasi berumur &gt; {diagnostics.freshness_days_active} hari
-                  {diagnostics.hidden_by_large_enterprise > 0 && ` dan ${diagnostics.hidden_by_large_enterprise} dari perusahaan korporat besar`} yang disembunyikan.
+                  Filter Aktif: Mengutamakan startup independen. Menyembunyikan{' '}
+                  {diagnostics.hidden_by_developer_platform ? <strong>{diagnostics.hidden_by_developer_platform} dev-tool platform</strong> : null}
+                  {diagnostics.hidden_by_large_enterprise > 0 ? `, ${diagnostics.hidden_by_large_enterprise} korporasi Tier-1` : null}
+                  {diagnostics.hidden_by_freshness > 0 ? `, dan ${diagnostics.hidden_by_freshness} lowongan &gt; ${diagnostics.freshness_days_active} hari.` : '.'}
                 </span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                {onlySmallCompanies && diagnostics.hidden_by_large_enterprise > 0 && (
+                {onlySmallCompanies && (
                   <button
                     onClick={() => setOnlySmallCompanies(false)}
                     className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 transition font-medium"
                   >
-                    Tampilkan Semua Ukuran
+                    Tampilkan Semua Kategori
                   </button>
                 )}
                 <button

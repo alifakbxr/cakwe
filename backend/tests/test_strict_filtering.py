@@ -18,7 +18,10 @@ def make_dummy_intel(
     size_cat: CompanySizeCategory,
     size_raw: str | None = None,
     size_conf: SizeConfidence = SizeConfidence.CONFIRMED,
-    match_score: int = 85
+    match_score: int = 85,
+    is_developer_platform: bool = False,
+    is_tier1: bool = False,
+    primary_industry: str = "software"
 ) -> JobIntelligence:
     return JobIntelligence(
         eligibility_status=eligibility_status,
@@ -32,6 +35,9 @@ def make_dummy_intel(
         company_size_category=size_cat,
         company_size_raw=size_raw,
         company_size_confidence=size_conf,
+        primary_industry=primary_industry,
+        is_developer_platform=is_developer_platform,
+        is_tier1=is_tier1,
         candidate_fit=CandidateFitAnalysis(
             match_score=match_score,
             is_recommended=True,
@@ -202,7 +208,59 @@ def test_strict_filtering_rules():
         assert len(intern_feed) == 1
         assert intern_feed[0]["id"] == "job-6-intern-open"
 
-        print("\nAll strict filtering assertions passed successfully!")
+        # Test 5: Developer Tools / Platform Exclusion
+        # Developer platform (e.g. CI/CD or Cloud DevTool) should be excluded from primary small company feed
+        devtool_job = JobRequisition(
+            source="test",
+            id="job-7-devtools-platform",
+            title="Senior Platform Engineer",
+            company_name="DevFlow Tools",
+            location="Remote Worldwide",
+            description="We build CI/CD pipelines and developer automation tools.",
+            published_at=1792260000,
+            intelligence=make_dummy_intel(
+                EligibilityStatus.VERIFIED_ELIGIBLE,
+                "Remote worldwide via EOR Deel",
+                CompanySizeCategory.SMALL_STARTUP,
+                "team of 25",
+                SizeConfidence.CONFIRMED,
+                90,
+                is_developer_platform=True,
+                is_tier1=False,
+                primary_industry="developer_tools"
+            )
+        )
+        save_job(devtool_job)
+
+        # Independent startup in fintech/healthcare (should be included in primary feed)
+        fintech_job = JobRequisition(
+            source="test",
+            id="job-8-fintech-startup",
+            title="Fullstack Developer (Laravel & Vue)",
+            company_name="HealthPay Inc",
+            location="Remote Worldwide",
+            description="Healthcare billing and payments software. 100% remote.",
+            published_at=1792260000,
+            intelligence=make_dummy_intel(
+                EligibilityStatus.VERIFIED_ELIGIBLE,
+                "Worldwide remote Deel",
+                CompanySizeCategory.SMALL_STARTUP,
+                "team of 30",
+                SizeConfidence.CONFIRMED,
+                92,
+                is_developer_platform=False,
+                is_tier1=False,
+                primary_industry="healthcare_fintech"
+            )
+        )
+        save_job(fintech_job)
+
+        current_primary = get_all_jobs(status="verified_eligible", only_small_companies=True)
+        primary_ids = [j["id"] for j in current_primary]
+        assert "job-8-fintech-startup" in primary_ids, "Independent healthcare/fintech startup must be included"
+        assert "job-7-devtools-platform" not in primary_ids, "Developer platform must be excluded from primary results"
+
+        print("\nAll strict filtering and company classification assertions passed successfully!")
 
     finally:
         database.DB_PATH = original_db_path

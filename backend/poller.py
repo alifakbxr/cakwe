@@ -21,10 +21,9 @@ from database import (
     upsert_company,
 )
 from schemas import JobRequisition, LifecycleStatus
-from sources.ashby import AshbyAdapter
-from sources.company_seeds import SEED_COMPANIES
 from sources.greenhouse import GreenhouseAdapter
 from sources.lever import LeverAdapter
+from sources.ashby import AshbyAdapter
 from sources.remotive import RemotiveAdapter
 from sources.jobicy import JobicyAdapter
 from sources.jobspipe import JobsPipeAdapter
@@ -32,28 +31,39 @@ from sources.workable import WorkableAdapter
 from sources.smartrecruiters import SmartRecruitersAdapter
 from sources.recruitee import RecruiteeAdapter
 
-from discovery import discover_from_job_listings, process_discovery_candidates
+from discovery import (
+    discover_from_job_listings,
+    process_discovery_candidates,
+    run_public_web_discovery,
+    ingest_github_slug_datasets,
+)
 
 
 POLL_INTERVAL_HOURS = int(os.getenv("POLL_INTERVAL_HOURS", "5"))
 FRESHNESS_WINDOW_SECONDS = 14 * 86400  # 14 Hari
 
 
-def seed_initial_companies():
-    """Memastikan company registry memiliki data awal boutique/small agencies, dan menonaktifkan seed tier-1 lama."""
-    active_tokens = {comp["ats_board_token"].lower() for comp in SEED_COMPANIES}
-    for comp in SEED_COMPANIES:
-        upsert_company(comp)
-
-    # Nonaktifkan seed lama yang tidak ada dalam daftar SEED_COMPANIES small/boutique
+async def ensure_dynamic_discovery_coverage():
+    """Memastikan sistem discovery dinamis memiliki pasokan kandidat awal dari web publik tanpa mengandalkan seed list."""
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, ats_board_token FROM companies WHERE discovery_source = 'seed'")
-    for row in cursor.fetchall():
-        if row["ats_board_token"].lower() not in active_tokens:
-            cursor.execute("UPDATE companies SET is_active = 0 WHERE id = ?", (row["id"],))
-    conn.commit()
+    active_count = cursor.execute("SELECT COUNT(*) FROM companies WHERE is_active = 1").fetchone()[0]
+    pending_candidates = cursor.execute("SELECT COUNT(*) FROM discovery_candidates WHERE status = 'pending'").fetchone()[0]
     conn.close()
+
+    print(f"[DISCOVERY-STATUS] Perusahaan aktif saat ini: {active_count} | Antrean kandidat pending: {pending_candidates}")
+    if active_count < 15 or pending_candidates == 0:
+        print("[DISCOVERY-BOOTSTRAP] Menginisialisasi dynamic discovery dari direktori open-source & web publik...")
+        try:
+            await ingest_github_slug_datasets()
+        except Exception as e:
+            print(f"[DISCOVERY-BOOTSTRAP-ERROR] Gagal bootstrap open-source: {e}")
+
+    # Verifikasi batch kandidat awal
+    try:
+        await process_discovery_candidates(batch_size=30)
+    except Exception as e:
+        print(f"[DISCOVERY-BOOTSTRAP-ERROR] Gagal verifikasi kandidat: {e}")
 
 
 async def poll_himalayas(client: httpx.AsyncClient) -> List[JobRequisition]:
@@ -360,7 +370,7 @@ async def should_catchup_sync() -> bool:
 
 async def main():
     init_db()
-    seed_initial_companies()
+    await ensure_dynamic_discovery_coverage()
 
     # Cek apakah perlu catchup sync seketika saat laptop/container menyala
     needs_sync = await should_catchup_sync()

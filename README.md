@@ -6,20 +6,21 @@ Cakwe adalah platform intelijen pencarian kerja remote global dan asisten pelama
 
 ## 🌟 Fitur Utama
 
-### 1. Multi-ATS Ingestion & Discovery Engine
+### 1. Dynamic Discovery & Multi-ATS Ingestion Engine
+- **Zero Hardcoded Seeds:** Penemuan perusahaan berjalan 100% dinamis melalui auto-sniffing URL lamaran agregator, web discovery crawler, dan sinkronisasi berkala candidate queue (`discovery_candidates`).
 - **Direct ATS Integration:** Mengagregasi lowongan langsung dari API publik Greenhouse, Lever, Ashby, Workable, SmartRecruiters, dan Recruitee tanpa scraping web yang rapuh.
-- **Sniffing & Candidate Board Discovery:** Secara otomatis mendeteksi URL board karir baru dari link lowongan agregator dan memvalidasinya ke registry perusahaan.
 - **High-Throughput Concurrency:** Polling paralel terkontrol (`asyncio.Semaphore(5)`) untuk ratusan board perusahaan dalam hitungan detik.
 - **Lifecycle Tracking:** Verifikasi otomatis apakah lowongan masih aktif atau sudah ditutup (`lifecycle_status: 'closed'`).
 
 ### 2. Evaluasi Kelayakan & Anti-Ghost Job
 - **Strict Indonesia Remote Verification:** Evaluasi kontrak kerja (EOR seperti Deel/Remote.com, Worldwide, SEA timezone) menggunakan AI reasoning. Tidak meloloskan lowongan yang membatasi visa atau hanya remote US/EU.
 - **Ghost Job & Seniority Risk Scoring:** Analisis tanggal publikasi, ketidakjelasan deskripsi kerja, dan verifikasi rasional terhadap rentang kompensasi.
-- **Ground-Truth Company Sizing:** Membedakan startup/studio kecil (10–100 karyawan) dengan korporasi besar secara akurat via seeded ground truth.
+- **Independent Startup Prioritization:** Mendeteksi dan memprioritaskan startup independen (10–100 karyawan) dari berbagai industri (Fintech, Healthtech, Logistics, E-commerce, Gaming, SaaS, dll).
+- **Developer Platform & Big Tech Filtering:** Mengidentifikasi dan menyembunyikan perusahaan platform developer (developer tools, CI/CD, dev infrastructure) serta korporasi besar tier-1 (>100 karyawan) dari feed utama startup, dengan opsi transparansi 1-click relax filter.
 
 ### 3. Smart Search & Feed Diagnostics
 - **Multi-Column Stack Search:** Filter peran mencari ke seluruh `title`, `skills_required`, `categories`, dan `description`.
-- **Feed Diagnostics Transparency:** Menampilkan alert banner ketika lowongan tersembunyi akibat filter umur lowongan atau filter ukuran perusahaan, dilengkapi opsi *1-click relax*.
+- **Feed Diagnostics Transparency:** Menampilkan alert banner interaktif ketika lowongan tersembunyi akibat filter umur lowongan, developer platform tools, atau korporasi besar, lengkap dengan rincian jumlah dan tombol relaksasi.
 
 ### 4. ATS Resume & Cover Letter Studio
 - **Mode A (CV Tailoring):** Unggah atau tempel CV yang sudah ada untuk dianalisis kecocokannya terhadap deskripsi lowongan secara instan.

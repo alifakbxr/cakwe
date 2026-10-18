@@ -77,6 +77,9 @@ export interface Job {
   company_size_category?: 'small_startup' | 'medium_startup' | 'agency_studio' | 'large_enterprise' | 'unknown'
   company_size_raw?: string | null
   company_size_confidence?: 'confirmed' | 'estimated' | 'unknown'
+  primary_industry?: string | null
+  is_developer_platform?: boolean | number
+  is_tier1?: boolean | number
   match_score?: number | null
   is_recommended?: boolean | number | null
   match_reasons?: string | string[] | null
@@ -174,6 +177,7 @@ export interface FilterDiagnostics {
   ineligible: number
   hidden_by_freshness: number
   hidden_by_large_enterprise: number
+  hidden_by_developer_platform?: number
   freshness_days_active: number
   only_small_active: boolean
 }

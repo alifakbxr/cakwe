@@ -70,7 +70,7 @@ class JobIntelligence(BaseModel):
         description="Alasan penilaian risiko ghost job (misal: deskripsi sangat generik, atau sebaliknya sangat spesifik dengan tech stack jelas)",
     )
 
-    # Identifikasi Ukuran & Lingkungan Perusahaan (Target 10-100 orang)
+    # Identifikasi Ukuran & Karakteristik Perusahaan (Target: Independent Startups 10-100 orang)
     company_size_category: CompanySizeCategory = Field(
         default=CompanySizeCategory.UNKNOWN,
         description="Kategori ukuran perusahaan (small_startup: 10-50, medium_startup: 51-100, agency_studio, large_enterprise, unknown)"
@@ -82,6 +82,18 @@ class JobIntelligence(BaseModel):
     company_size_confidence: SizeConfidence = Field(
         default=SizeConfidence.UNKNOWN,
         description="Tingkat kepastian estimasi ukuran perusahaan (confirmed, estimated, unknown)"
+    )
+    primary_industry: Optional[str] = Field(
+        default="unknown",
+        description="Industri primer bisnis perusahaan (misal: fintech, healthcare, e-commerce, logistics, edtech, developer_tools, devops)"
+    )
+    is_developer_platform: bool = Field(
+        default=False,
+        description="True jika produk/layanan utama perusahaan adalah platform/tools/infrastruktur khusus developer (mis: code hosting, CI/CD, dev tooling, API platform)"
+    )
+    is_tier1: bool = Field(
+        default=False,
+        description="True jika perusahaan adalah Big Tech, konglomerasi raksasa, atau korporasi multinasional Tier-1"
     )
 
     # Personalized Match untuk Profil 1-3 Thn (PHP/Laravel, Go, Vue/TS, Python/AI)

@@ -34,15 +34,20 @@ Tugas Anda:
    - HANYA tandai 'verified_eligible' jika ada bukti verbatim kutipan teks lowongan yang menyatakan 'Worldwide', 'Anywhere in the world', 'APAC / Asia', 'Open globally', atau 'Indonesia'.
    - Wajib sertakan 'eligibility_quote' berupa kutipan persis (verbatim quote) dari teks lowongan dalam bahasa Inggris sebagai bukti verifikasi.
 
-2. Identifikasi Ukuran & Karakteristik Perusahaan (Company Size):
+2. Identifikasi Ukuran, Industri & Karakteristik Perusahaan (Company Classification):
    - Klasifikasikan ke dalam 'company_size_category':
      * 'small_startup': 10 - 50 karyawan (misal: 'seed stage', 'series A', 'small team of 15', 'lean team').
      * 'medium_startup': 51 - 100 karyawan (misal: 'scaling to 80', '50-100 people').
      * 'agency_studio': Software house, web development agency, consultancy, digital product studio.
      * 'large_enterprise': Korporasi besar atau scale-up >100 karyawan.
-     * 'unknown': Tidak ada petunjuk ukuran di teks lowongan.
+     * 'unknown': Tidak ada petunjuk ukuran di teks lowongan. JANGAN menebak; jika tidak ada bukti, pilih 'unknown'.
    - Ekstrak kutipan jika ada ke 'company_size_raw' (contoh: 'We are a boutique studio of 20 engineers').
-   - Berikan tingkat kepastian 'company_size_confidence': 'confirmed' jika eksplisit, 'estimated' jika dari petunjuk konteks, 'unknown' jika nihil. JANGAN mengarang angka jika tidak ada bukti.
+   - Berikan tingkat kepastian 'company_size_confidence': 'confirmed' jika eksplisit, 'estimated' jika dari petunjuk konteks, 'unknown' jika nihil.
+   - Identifikasi 'primary_industry' (contoh: 'fintech', 'healthcare', 'edtech', 'logistics', 'e-commerce', 'developer_tools', 'devops', 'enterprise_saas', 'media').
+   - Evaluasi 'is_developer_platform':
+     * Berikan True JIKA DAN HANYA JIKA bisnis inti perusahaan adalah membuat produk khusus untuk developer (misal: code hosting, CI/CD, database cloud, developer tooling, monitoring/APM, framework/SDK platform).
+     * Berikan False jika perusahaan di bidang lain (fintech, kesehatan, logistik, agensi web, e-commerce, media, edukasi) meskipun mereka merekrut software engineer.
+   - Evaluasi 'is_tier1': True jika perusahaan adalah Big Tech, raksasa konglomerat, atau enterprise multinasional besar (misal: Google, Meta, Canonical, GitLab, Automattic, Elastic, AWS, Microsoft). False untuk startup independen dan studio.
 
 3. Hitung Personalized Candidate Fit Analysis (candidate_fit):
    - match_score (0 - 100):

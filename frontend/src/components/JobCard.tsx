@@ -89,6 +89,11 @@ export const JobCard: React.FC<JobCardProps> = ({
                   Digital Studio / Agency
                 </span>
               )}
+              {job.primary_industry && job.primary_industry !== 'unknown' && (
+                <span className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 text-[11px] font-medium capitalize">
+                  {job.primary_industry}
+                </span>
+              )}
 
               {/* Match Score */}
               {job.match_score !== undefined && job.match_score !== null && (
