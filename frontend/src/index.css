@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #090d16;
+    --bg-surface: #0f172a;
+    --bg-card: #141e33;
+    --border-subtle: #1e293b;
+    --border-prominent: #334155;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+  }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", Helvetica, Arial, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom subtle scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
+}
+
+/* Print Styles for Harvard/MIT/Modern/Technical ATS Resume */
+@media print {
+  @page {
+    size: letter portrait;
+    margin: 0.5in;
+  }
+
+  /* Sembunyikan semua elemen visual aplikasi */
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  header,
+  nav,
+  aside,
+  footer,
+  button,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Reset modal fixed overlay agar tidak mengunci scroll/page-break */
+  .fixed {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Bebaskan semua container scroll agar browser bisa membuat multi-page normal */
+  .overflow-hidden,
+  .overflow-y-auto {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  .shadow-xl, .shadow-2xl, .shadow-sm, .shadow-md {
+    box-shadow: none !important;
+  }
+
+  /* Ganti form input/textarea saat dicetak menjadi teks statis yang tidak terpotong */
+  input, textarea {
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    resize: none !important;
+    padding: 0 !important;
+    color: #000000 !important;
+    font-family: inherit !important;
+  }
+
+  .print-page-break-avoid {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Target Cetak Bersih */
+  #printable-resume, #printable-cover-letter {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}

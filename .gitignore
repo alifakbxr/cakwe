@@ -1,0 +1,78 @@
+# System & Agent Metadata
+.agents/
+PROJECT_STATE.md
+EVALUATION_REPORT.md
+AUDIT_REPORT.md
+IMPROVEMENT_ROADMAP.md
+TEST_COVERAGE_GAPS.md
+IMPROVEMENT_RECOMMENDATIONS.md
+IMPLEMENTATION_ROADMAP.md
+RESULT_QUALITY_ANALYSIS.md
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.venv/
+env/
+venv/
+ENV/
+
+# Database files
+*.sqlite3
+*.db
+backend/cakwe.db
+backend/job_radar.db
+data/db/*.sqlite3
+data/db/*.db
+
+# Generated PDF/Docx test outputs
+*.pdf
+*.docx
+test_output.pdf
+backend/test_output.pdf
+
+# Secrets & Environment
+.env
+.env.*
+!.env.example
+
+# Node / Frontend
+node_modules/
+.next/
+dist/
+.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
