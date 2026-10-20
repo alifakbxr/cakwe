@@ -5,7 +5,8 @@ import {
   ShieldCheck, 
   Search, 
   Sparkles, 
-  Building
+  Building,
+  Clock
 } from 'lucide-react'
 
 import type { 
@@ -29,6 +30,7 @@ import { SettingsView } from './components/SettingsView'
 import { Button } from './components/ui/button'
 import { Card } from './components/ui/card'
 import { Input } from './components/ui/input'
+import { Badge } from './components/ui/badge'
 
 export default function App() {
   const [jobs, setJobs] = useState<Job[]>([])
@@ -43,7 +45,9 @@ export default function App() {
   const [currentTab, setCurrentTab] = useState<ViewTab>('DASHBOARD')
   const [showClosed, setShowClosed] = useState(false)
   const [onlyVerified, setOnlyVerified] = useState(true)
-  const [onlySmallCompanies, setOnlySmallCompanies] = useState(true)
+  const [onlySmallCompanies, setOnlySmallCompanies] = useState(false)
+  const [minMatchScore, setMinMatchScore] = useState<number | null>(80)
+  const [maxExpYears, setMaxExpYears] = useState<number | null>(3)
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null)
   const [diagnostics, setDiagnostics] = useState<any>(null)
   
@@ -190,6 +194,16 @@ export default function App() {
         include_closed: showClosed ? 'true' : 'false',
         role: selectedRole
       })
+      if (minMatchScore !== null) {
+        params.append('min_score', String(minMatchScore))
+      } else {
+        params.append('min_score', '0')
+      }
+      if (maxExpYears !== null) {
+        params.append('max_exp', String(maxExpYears))
+      } else {
+        params.append('max_exp', '99')
+      }
       const [jobsRes, statsRes] = await Promise.all([
         fetch(`/api/jobs?${params.toString()}`),
         fetch('/api/stats')
@@ -216,7 +230,7 @@ export default function App() {
 
   useEffect(() => {
     fetchJobsAndStats()
-  }, [onlyVerified, onlySmallCompanies, showClosed, selectedRole])
+  }, [onlyVerified, onlySmallCompanies, showClosed, selectedRole, minMatchScore, maxExpYears])
 
   useEffect(() => {
     fetchSyncStatus()
@@ -466,14 +480,16 @@ export default function App() {
   }
 
 
-  // Client search filtering
+  // Client search filtering (safe & defensive)
   const filteredJobs = jobs.filter(job => {
-    const q = searchQuery.toLowerCase()
-    const matchQuery = !q || 
-      job.title.toLowerCase().includes(q) || 
-      job.company_name.toLowerCase().includes(q) || 
-      job.skills_required?.some(s => s.toLowerCase().includes(q))
-    
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) {
+      return !onlyVerified || job.eligibility_status === 'verified_eligible'
+    }
+    const matchTitle = Boolean(job.title?.toLowerCase().includes(q))
+    const matchCompany = Boolean(job.company_name?.toLowerCase().includes(q))
+    const matchSkills = Array.isArray(job.skills_required) && job.skills_required.some(s => typeof s === 'string' && s.toLowerCase().includes(q))
+    const matchQuery = matchTitle || matchCompany || matchSkills
     const matchVerified = !onlyVerified || job.eligibility_status === 'verified_eligible'
 
     return matchQuery && matchVerified
@@ -594,30 +610,76 @@ export default function App() {
           {/* Stats Bar */}
           {stats && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <Card className="p-4 bg-[#0f172a] border-slate-800">
-                <div className="text-xs text-indigo-400 font-medium flex items-center gap-1.5">
-                  <Building className="w-4 h-4" />
-                  Verified Small Companies (10–100)
+              <Card 
+                onClick={() => {
+                  setOnlyVerified(true)
+                  setOnlySmallCompanies(false)
+                  setMinMatchScore(null)
+                  setMaxExpYears(null)
+                  setSelectedRole('ALL')
+                  setSearchQuery('')
+                }}
+                className={`p-4 transition cursor-pointer select-none border ${
+                  onlyVerified && !onlySmallCompanies && minMatchScore === null && maxExpYears === null
+                    ? 'bg-emerald-950/40 border-emerald-500/50 shadow-sm ring-1 ring-emerald-500/30'
+                    : 'bg-[#0f172a] border-slate-800 hover:border-slate-700'
+                }`}
+                title="Klik untuk tampilkan semua lowongan terverifikasi Indonesia"
+              >
+                <div className="text-xs text-emerald-400 font-medium flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4" />
+                    Terverifikasi Domisili Indonesia
+                  </span>
+                  <span className="text-[10px] text-emerald-400/80 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/60 font-mono">
+                    Total: {stats.verified_eligible_jobs}
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-emerald-400 mt-1">
+                  {stats.verified_eligible_jobs}
+                </div>
+                <div className="text-[11px] text-slate-400 mt-1">100% Remote / Bukti Kontrak EOR Worldwide</div>
+              </Card>
+
+              <Card 
+                onClick={() => {
+                  setOnlyVerified(true)
+                  setMinMatchScore(80)
+                  setMaxExpYears(3)
+                  setOnlySmallCompanies(false)
+                }}
+                className={`p-4 transition cursor-pointer select-none border ${
+                  minMatchScore === 80 
+                    ? 'bg-indigo-950/40 border-indigo-500/50 shadow-sm ring-1 ring-indigo-500/30' 
+                    : 'bg-[#0f172a] border-slate-800 hover:border-slate-700'
+                }`}
+                title="Klik untuk filter kecocokan tinggi (Fit > 80% & Exp 0-3 thn)"
+              >
+                <div className="text-xs text-indigo-400 font-medium flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4" />
+                    Rekomendasi Akurat (Fit &gt; 80%)
+                  </span>
+                  <span className="text-[10px] text-indigo-300/80 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/60 font-mono">
+                    Target Utama
+                  </span>
                 </div>
                 <div className="text-2xl font-bold text-white mt-1">
-                  {stats.verified_small_company_jobs ?? stats.verified_eligible_jobs}
+                  {jobs.filter(j => (j.match_score ?? 0) >= 80).length}
                 </div>
-                <div className="text-[11px] text-slate-500 mt-1">Boutique, Studios, & Startups</div>
+                <div className="text-[11px] text-slate-400 mt-1">Pengalaman 0–3 thn, stack selaras</div>
               </Card>
 
               <Card className="p-4 bg-[#0f172a] border-slate-800">
-                <div className="text-xs text-emerald-400 font-medium flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4" />
-                  Terverifikasi Domisili Indonesia
+                <div className="text-xs text-slate-400 font-medium flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Briefcase className="w-4 h-4 text-slate-400" />
+                    Total Lowongan Terpantau
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-mono">14 Hari</span>
                 </div>
-                <div className="text-2xl font-bold text-emerald-400 mt-1">{stats.verified_eligible_jobs}</div>
-                <div className="text-[11px] text-slate-500 mt-1">Berdasarkan bukti kontrak EOR / Global</div>
-              </Card>
-
-              <Card className="p-4 bg-[#0f172a] border-slate-800">
-                <div className="text-xs text-slate-400 font-medium">Total Lowongan Terpantau</div>
                 <div className="text-2xl font-bold text-white mt-1">{stats.total_jobs}</div>
-                <div className="text-[11px] text-slate-500 mt-1">Multi-ATS Public Feeds (14 Hari)</div>
+                <div className="text-[11px] text-slate-500 mt-1">Multi-ATS Public Feeds (Aktif & Terpindai)</div>
               </Card>
             </div>
           )}
@@ -677,7 +739,44 @@ export default function App() {
               </div>
 
               <div className="flex items-center gap-3 text-xs text-slate-400 flex-wrap">
-                <label className="flex items-center gap-1.5 cursor-pointer bg-blue-950/60 border border-blue-600/60 px-2.5 py-1 rounded-lg text-blue-300 font-medium">
+                {/* High Fit Score Filter */}
+                <label className={`flex items-center gap-1.5 cursor-pointer px-2.5 py-1 rounded-lg font-medium transition ${
+                  minMatchScore !== null 
+                    ? 'bg-emerald-950/60 border border-emerald-600/60 text-emerald-300' 
+                    : 'bg-slate-900/60 border border-slate-800 text-slate-400 hover:text-slate-200'
+                }`}>
+                  <input
+                    type="checkbox"
+                    checked={minMatchScore !== null}
+                    onChange={e => setMinMatchScore(e.target.checked ? 80 : null)}
+                    className="rounded border-emerald-600 text-emerald-500 focus:ring-0"
+                  />
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                  Fit &gt; 80% (Semua Perusahaan)
+                </label>
+
+                {/* Experience <= 3 yrs Filter */}
+                <label className={`flex items-center gap-1.5 cursor-pointer px-2.5 py-1 rounded-lg font-medium transition ${
+                  maxExpYears !== null 
+                    ? 'bg-cyan-950/60 border border-cyan-600/60 text-cyan-300' 
+                    : 'bg-slate-900/60 border border-slate-800 text-slate-400 hover:text-slate-200'
+                }`}>
+                  <input
+                    type="checkbox"
+                    checked={maxExpYears !== null}
+                    onChange={e => setMaxExpYears(e.target.checked ? 3 : null)}
+                    className="rounded border-cyan-600 text-cyan-500 focus:ring-0"
+                  />
+                  <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                  0–3 Thn Pengalaman
+                </label>
+
+                {/* Small Companies Filter */}
+                <label className={`flex items-center gap-1.5 cursor-pointer px-2.5 py-1 rounded-lg font-medium transition ${
+                  onlySmallCompanies 
+                    ? 'bg-blue-950/60 border border-blue-600/60 text-blue-300' 
+                    : 'bg-slate-900/60 border border-slate-800 text-slate-400 hover:text-slate-200'
+                }`}>
                   <input
                     type="checkbox"
                     checked={onlySmallCompanies}
@@ -685,7 +784,7 @@ export default function App() {
                     className="rounded border-blue-600 text-blue-500 focus:ring-0"
                   />
                   <Building className="w-3.5 h-3.5 text-blue-400" />
-                  Small Companies (10–100)
+                  Hanya Startup Kecil (10–100)
                 </label>
 
                 <label className="flex items-center gap-1.5 cursor-pointer text-slate-400 hover:text-slate-200">
@@ -702,7 +801,7 @@ export default function App() {
           </Card>
 
           {/* Filter Diagnostics Alert / Transparency Banner */}
-          {diagnostics && (diagnostics.hidden_by_freshness > 0 || diagnostics.hidden_by_large_enterprise > 0 || (diagnostics.hidden_by_developer_platform && diagnostics.hidden_by_developer_platform > 0)) && (
+          {onlySmallCompanies && diagnostics && (diagnostics.hidden_by_freshness > 0 || diagnostics.hidden_by_large_enterprise > 0 || (diagnostics.hidden_by_developer_platform && diagnostics.hidden_by_developer_platform > 0)) && (
             <div className="bg-slate-900/90 border border-indigo-500/30 rounded-xl p-3.5 px-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2.5 text-slate-300">
                 <span className="flex h-2 w-2 rounded-full bg-indigo-400 animate-pulse" />
@@ -731,6 +830,8 @@ export default function App() {
                     setSelectedRole('ALL')
                     setSearchQuery('')
                     setOnlySmallCompanies(false)
+                    setMinMatchScore(null)
+                    setMaxExpYears(null)
                   }}
                   className="h-7 bg-indigo-600/40 hover:bg-indigo-600/60 text-indigo-200 border border-indigo-500/40"
                 >
@@ -739,6 +840,42 @@ export default function App() {
               </div>
             </div>
           )}
+
+          {/* Feed Header with Live Count Synchronization */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1 pt-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <span>Daftar Lowongan</span>
+                <Badge variant="secondary" className="font-mono text-xs px-2 py-0.5">
+                  {filteredJobs.length} posisi
+                </Badge>
+              </h3>
+
+              {stats && filteredJobs.length !== (onlyVerified ? stats.verified_eligible_jobs : stats.total_jobs) && (
+                <span className="text-xs text-slate-400">
+                  (difilter dari total <strong className="text-emerald-400">{onlyVerified ? stats.verified_eligible_jobs : stats.total_jobs}</strong> {onlyVerified ? 'terverifikasi' : 'terpantau'})
+                </span>
+              )}
+            </div>
+
+            {/* Quick Action: Reset or Show All */}
+            {(onlySmallCompanies || minMatchScore !== null || maxExpYears !== null || selectedRole !== 'ALL' || searchQuery) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setOnlySmallCompanies(false)
+                  setMinMatchScore(null)
+                  setMaxExpYears(null)
+                  setSelectedRole('ALL')
+                  setSearchQuery('')
+                }}
+                className="h-7 text-xs text-indigo-300 border-slate-700 hover:bg-slate-800"
+              >
+                Reset Filter (Tampilkan Semua {onlyVerified ? stats?.verified_eligible_jobs : stats?.total_jobs})
+              </Button>
+            )}
+          </div>
 
           {/* Feed List Container */}
           {loading ? (

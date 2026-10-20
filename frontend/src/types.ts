@@ -84,6 +84,9 @@ export interface Job {
   is_recommended?: boolean | number | null
   match_reasons?: string | string[] | null
   missing_skills?: string | string[] | null
+  min_years_experience?: number | null
+  experience_quote?: string | null
+  employment_type?: 'full_time' | 'contract' | 'eor' | 'independent_contractor' | 'part_time' | 'internship' | 'unknown' | string | null
   lifecycle_status?: 'active' | 'closed' | 'expired' | 'removed'
   application_status?: string | null
   applied_date?: string | null
@@ -144,6 +147,8 @@ export interface UserPreferences {
   min_salary_usd: number | null
   max_salary_usd: number | null
   employment_types: string[]
+  min_match_score?: number | null
+  max_years_experience?: number | null
 
   // 2. Geographic Eligibility
   candidate_country: string

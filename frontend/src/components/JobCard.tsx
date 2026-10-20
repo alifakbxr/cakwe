@@ -1,4 +1,3 @@
-import React from 'react'
 import { 
   Building, 
   MapPin, 
@@ -11,12 +10,26 @@ import {
   EyeOff, 
   ShieldCheck, 
   Check, 
-  AlertTriangle 
+  AlertTriangle,
+  Briefcase,
+  Clock
 } from 'lucide-react'
 import type { Job } from '../types'
 import { Card } from './ui/card'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
+
+const formatEmploymentType = (type?: string | null) => {
+  switch (type) {
+    case 'full_time': return 'Full-time'
+    case 'contract': return 'Contract'
+    case 'eor': return 'EOR (Deel/Remote)'
+    case 'independent_contractor': return 'Contractor'
+    case 'part_time': return 'Part-time'
+    case 'internship': return 'Internship'
+    default: return null
+  }
+}
 
 interface JobCardProps {
   job: Job
@@ -92,9 +105,36 @@ export const JobCard: React.FC<JobCardProps> = ({
                   Digital Studio / Agency
                 </Badge>
               )}
+              {job.company_size_category === 'large_enterprise' && (
+                <Badge variant="outline" className="gap-1 text-[11px] font-medium text-slate-300 border-slate-700">
+                  <Building className="w-3 h-3" />
+                  Enterprise
+                </Badge>
+              )}
               {job.primary_industry && job.primary_industry !== 'unknown' && (
                 <Badge variant="secondary" className="text-[11px] font-medium capitalize">
                   {job.primary_industry}
+                </Badge>
+              )}
+
+              {/* Experience Level Badge */}
+              {job.min_years_experience !== undefined && job.min_years_experience !== null ? (
+                <Badge variant="outline" className="gap-1 text-[11px] font-medium border-slate-700 text-slate-200 bg-slate-900/60">
+                  <Clock className="w-3 h-3 text-cyan-400" />
+                  {job.min_years_experience === 0 ? '0 yrs (Entry)' : `${job.min_years_experience}–3 yrs exp`}
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="gap-1 text-[11px] font-medium border-slate-800 text-slate-400 bg-slate-950/60">
+                  <Clock className="w-3 h-3 text-slate-500" />
+                  Exp: Not Specified
+                </Badge>
+              )}
+
+              {/* Employment Type Badge */}
+              {formatEmploymentType(job.employment_type) && (
+                <Badge variant="outline" className="gap-1 text-[11px] font-medium border-slate-700 text-indigo-300 bg-indigo-950/30">
+                  <Briefcase className="w-3 h-3 text-indigo-400" />
+                  {formatEmploymentType(job.employment_type)}
                 </Badge>
               )}
 
@@ -130,6 +170,17 @@ export const JobCard: React.FC<JobCardProps> = ({
                 <div>
                   <span className="font-semibold text-emerald-200">Verified Remote Evidence: </span>
                   <span className="italic">"{job.eligibility_quote}"</span>
+                </div>
+              </div>
+            )}
+
+            {/* Experience Requirement Quote Card */}
+            {job.experience_quote && (
+              <div className="p-2.5 rounded-lg bg-cyan-950/20 border border-cyan-800/40 text-xs text-cyan-300 flex items-start gap-2 max-w-3xl">
+                <Clock className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-semibold text-cyan-200">Experience Requirement: </span>
+                  <span className="italic">"{job.experience_quote}"</span>
                 </div>
               </div>
             )}

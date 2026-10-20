@@ -104,7 +104,7 @@ def startup():
 
 
 def parse_job_row(row: dict) -> dict:
-    """Mengubah string JSON di SQLite kembali menjadi struktur data Python/JSON."""
+    """Mengubah string JSON di SQLite kembali menjadi struktur data Python/JSON yang konsisten."""
     res = dict(row)
     for field in [
         "country_restrictions",
@@ -117,13 +117,35 @@ def parse_job_row(row: dict) -> dict:
         "match_reasons",
         "missing_skills",
     ]:
-        if res.get(field):
-            try:
-                res[field] = json.loads(res[field])
-            except Exception:
-                res[field] = []
+        val = res.get(field)
+        if val is not None:
+            if isinstance(val, str):
+                try:
+                    parsed = json.loads(val)
+                    res[field] = parsed if isinstance(parsed, list) else [parsed]
+                except Exception:
+                    # Jika teks biasa dan bukan JSON, jangan dihilangkan
+                    res[field] = [val] if val.strip() else []
+            elif isinstance(val, list):
+                res[field] = val
+            else:
+                res[field] = [val]
         else:
             res[field] = []
+
+    # Pastikan tipe data konsisten untuk field numerik
+    if res.get("min_years_experience") is not None:
+        try:
+            res["min_years_experience"] = int(res["min_years_experience"])
+        except (ValueError, TypeError):
+            res["min_years_experience"] = None
+
+    if res.get("match_score") is not None:
+        try:
+            res["match_score"] = int(res["match_score"])
+        except (ValueError, TypeError):
+            res["match_score"] = None
+
     return res
 
 
@@ -136,6 +158,8 @@ def list_jobs(
     include_closed: Optional[bool] = Query(None, description="Tampilkan lowongan closed"),
     max_ghost_risk: Optional[float] = Query(None, description="Maksimal skor ghost risk"),
     min_salary: Optional[float] = Query(None, description="Filter gaji minimal tahunan USD"),
+    min_score: Optional[int] = Query(None, description="Filter minimal match score (misal: 80)"),
+    max_exp: Optional[int] = Query(None, description="Filter maksimal tahun pengalaman (misal: 3)"),
 ):
     """Mengambil daftar lowongan yang telah lolos Stage A & User Preferences:
     - Verified Eligible dari Indonesia / Worldwide
@@ -150,6 +174,8 @@ def list_jobs(
     eff_only_small = only_small if only_small is not None else user_prefs.only_small_companies
     eff_include_closed = include_closed if include_closed is not None else user_prefs.show_closed_jobs
     eff_ghost_risk = max_ghost_risk if max_ghost_risk is not None else user_prefs.max_ghost_risk
+    eff_min_score = min_score if min_score is not None else getattr(user_prefs, "min_match_score", None)
+    eff_max_exp = max_exp if max_exp is not None else getattr(user_prefs, "max_years_experience", None)
 
     # Override min_salary di preferences jika diberikan di query
     if min_salary is not None:
@@ -161,6 +187,8 @@ def list_jobs(
         include_closed=eff_include_closed,
         target_role=role,
         search=search,
+        min_match_score=eff_min_score,
+        max_years_experience=eff_max_exp,
         preferences=user_prefs,
     )
     parsed = [parse_job_row(j) for j in jobs]

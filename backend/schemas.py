@@ -2,6 +2,20 @@ from enum import Enum
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
+# Versi aturan scoring AI. Naikkan setiap kali prompt/aturan match_score berubah
+# agar cache AI tidak dipakai ulang dan lowongan lama bisa di-rescore (lihat rescore_jobs.py).
+SCORING_VERSION = 2
+
+
+class EmploymentType(str, Enum):
+    FULL_TIME = "full_time"
+    CONTRACT = "contract"
+    EOR = "eor"                                   # Employer of Record (Deel, Remote.com, Oyster, dll)
+    INDEPENDENT_CONTRACTOR = "independent_contractor"
+    PART_TIME = "part_time"
+    INTERNSHIP = "internship"
+    UNKNOWN = "unknown"
+
 
 class EligibilityStatus(str, Enum):
     VERIFIED_ELIGIBLE = "verified_eligible"
@@ -25,8 +39,8 @@ class SizeConfidence(str, Enum):
 
 
 class CandidateFitAnalysis(BaseModel):
-    """Hasil kalkulasi kecocokan lowongan dengan profil talenta 1-3 tahun exp."""
-    match_score: int = Field(..., ge=0, le=100, description="Skor kecocokan 0-100 berdasarkan relevansi stack, seniority 1-3 thn, dan ukuran perusahaan")
+    """Hasil kalkulasi kecocokan lowongan dengan profil talenta 0-3 tahun exp."""
+    match_score: int = Field(..., ge=0, le=100, description="Skor kecocokan 0-100 HANYA berdasarkan relevansi stack, kecocokan level pengalaman, dan relevansi peran. Ukuran/reputasi perusahaan TIDAK memengaruhi skor.")
     is_recommended: bool = Field(..., description="True jika lowongan sangat realistis dan direkomendasikan untuk dilamar")
     match_reasons: List[str] = Field(..., description="Poin-poin mengapa lowongan ini cocok (misal: stack Laravel/Vue cocok, tim ramping)")
     missing_or_gap_skills: List[str] = Field(default=[], description="Kualifikasi yang menjadi tantangan/gap (jika ada)")
@@ -96,7 +110,23 @@ class JobIntelligence(BaseModel):
         description="True jika perusahaan adalah Big Tech, konglomerasi raksasa, atau korporasi multinasional Tier-1"
     )
 
-    # Personalized Match untuk Profil 1-3 Thn (PHP/Laravel, Go, Vue/TS, Python/AI)
+    # Persyaratan keras yang dapat difilter (bukan bagian dari match_score)
+    min_years_experience: Optional[int] = Field(
+        default=None,
+        ge=0,
+        le=30,
+        description="Minimal tahun pengalaman profesional yang DIWAJIBKAN lowongan (angka terkecil dari rentang, mis. '2-4 years' -> 2). null jika tidak disebutkan sama sekali."
+    )
+    experience_quote: Optional[str] = Field(
+        default=None,
+        description="Kutipan verbatim persyaratan pengalaman dari teks lowongan (null jika tidak ada)"
+    )
+    employment_type: EmploymentType = Field(
+        default=EmploymentType.UNKNOWN,
+        description="Jenis hubungan kerja: full_time, contract, eor, independent_contractor, part_time, internship, unknown"
+    )
+
+    # Personalized Match untuk Profil 0-3 Thn (PHP/Laravel, Go, Vue/TS, Python/AI)
     candidate_fit: Optional[CandidateFitAnalysis] = Field(
         default=None,
         description="Analisis kecocokan personal untuk kandidat level 1-3 tahun"
@@ -321,6 +351,16 @@ class UserPreferences(BaseModel):
         default=["junior", "mid_level"],
         description="Tingkat pengalaman: junior, mid_level, senior, lead"
     )
+    max_years_experience: Optional[int] = Field(
+        default=3,
+        description="Batas maksimal syarat pengalaman tahunan yang diinginkan (default: 3 tahun, yaitu < 4 tahun). Lowongan tanpa syarat eksplisit tetap lolos."
+    )
+    min_match_score: int = Field(
+        default=80,
+        ge=0,
+        le=100,
+        description="Minimal skor kecocokan profil (default: 80 untuk menyaring kecocokan tinggi)"
+    )
     min_salary_usd: Optional[float] = Field(
         default=12000.0,
         description="Ekspektasi gaji minimal dalam USD tahunan (default: $1,000/bulan atau $12,000/tahun)"
@@ -330,8 +370,8 @@ class UserPreferences(BaseModel):
         description="Ekspektasi gaji maksimal dalam USD tahunan"
     )
     employment_types: List[str] = Field(
-        default=["full_time", "contract"],
-        description="Jenis kontrak: full_time, part_time, contract, freelance"
+        default=["full_time", "contract", "eor", "independent_contractor"],
+        description="Jenis kontrak: full_time, contract, eor, independent_contractor, part_time, internship"
     )
 
     # 2. Geographic Eligibility
@@ -358,16 +398,16 @@ class UserPreferences(BaseModel):
 
     # 3. Company Preferences
     only_small_companies: bool = Field(
-        default=True,
-        description="Hanya memprioritaskan startup ramping dan agensi/studio (10-100 orang)"
+        default=False,
+        description="Filter opsional: jika True, hanya menampilkan startup ramping (10-100 orang). Default False agar mencakup seluruh ukuran perusahaan."
     )
     preferred_company_sizes: List[str] = Field(
-        default=["small_startup", "medium_startup", "agency_studio"],
+        default=["small_startup", "medium_startup", "agency_studio", "large_enterprise", "unknown"],
         description="Kategori ukuran perusahaan yang diizinkan"
     )
     exclude_tier1_enterprises: bool = Field(
-        default=True,
-        description="Kecualikan korporasi raksasa Tier-1 dan big tech 500+ karyawan"
+        default=False,
+        description="Kecualikan korporasi raksasa Tier-1 jika diaktifkan (default: False)"
     )
     excluded_companies: List[str] = Field(
         default=[],

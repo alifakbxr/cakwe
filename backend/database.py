@@ -83,6 +83,9 @@ def init_db():
         ("primary_industry", "TEXT DEFAULT 'unknown'"),
         ("is_developer_platform", "INTEGER DEFAULT 0"),
         ("is_tier1", "INTEGER DEFAULT 0"),
+        ("min_years_experience", "INTEGER"),
+        ("experience_quote", "TEXT"),
+        ("employment_type", "TEXT DEFAULT 'unknown'"),
     ]
     for col_name, col_type in new_cols:
         if col_name not in existing_cols:
@@ -92,6 +95,7 @@ def init_db():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_freshness ON jobs (published_at, lifecycle_status);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_company ON jobs (company_id);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_match ON jobs (match_score, is_recommended);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_experience ON jobs (min_years_experience);")
 
     # Tabel Company Registry
     cursor.execute("""
@@ -267,8 +271,9 @@ def save_job(job: JobRequisition):
                 is_tier1 = 1 if c_row["is_tier1"] else 0
             if c_row["is_developer_platform"] is not None:
                 is_dev_platform = 1 if c_row["is_developer_platform"] else 0
-            if c_row["industry"]:
-                primary_industry = c_row["industry"]
+    min_years_exp = intel.min_years_experience if intel else None
+    exp_quote = intel.experience_quote if intel else None
+    emp_type = intel.employment_type.value if intel and intel.employment_type else "unknown"
 
     cursor.execute("""
     INSERT INTO jobs (
@@ -281,7 +286,8 @@ def save_job(job: JobRequisition):
         skills_required, ghost_risk_score, ghost_risk_reason,
         company_size_category, company_size_raw, company_size_confidence,
         match_score, is_recommended, match_reasons, missing_skills,
-        primary_industry, is_developer_platform, is_tier1
+        primary_industry, is_developer_platform, is_tier1,
+        min_years_experience, experience_quote, employment_type
     ) VALUES (
         ?, ?, ?, ?, ?,
         ?, ?, ?,
@@ -292,6 +298,7 @@ def save_job(job: JobRequisition):
         ?, ?, ?,
         ?, ?, ?,
         ?, ?, ?, ?,
+        ?, ?, ?,
         ?, ?, ?
     )
     ON CONFLICT(id) DO UPDATE SET
@@ -309,7 +316,10 @@ def save_job(job: JobRequisition):
         missing_skills = excluded.missing_skills,
         primary_industry = excluded.primary_industry,
         is_developer_platform = excluded.is_developer_platform,
-        is_tier1 = excluded.is_tier1;
+        is_tier1 = excluded.is_tier1,
+        min_years_experience = excluded.min_years_experience,
+        experience_quote = excluded.experience_quote,
+        employment_type = excluded.employment_type;
     """, (
         job.id,
         job.source,
@@ -343,6 +353,9 @@ def save_job(job: JobRequisition):
         primary_industry,
         is_dev_platform,
         is_tier1,
+        min_years_exp,
+        exp_quote,
+        emp_type,
     ))
 
     # Simpan history jika ada perubahan gaji atau eligibility pada job yang sudah ada
@@ -423,16 +436,20 @@ def get_all_jobs(
     only_small_companies: Optional[bool] = None,
     target_role: Optional[str] = None,
     search: Optional[str] = None,
+    min_match_score: Optional[int] = None,
+    max_years_experience: Optional[int] = None,
     user_id: str = "default",
     preferences: Optional[UserPreferences] = None,
 ) -> List[dict]:
     """Mengambil daftar lowongan dengan strict Stage A eligibility dan dynamic user preferences:
     1. Active lifecycle & freshness (sesuai user preferences atau parameter override)
     2. verified_eligible (reside in Indonesia/worldwide permitted)
-    3. Small companies / Preferred company sizes
-    4. Excluded companies blacklist
-    5. Min/Max Salary filter jika ada
-    6. Not dismissed by candidate
+    3. Match score threshold (default > 80% fit)
+    4. Experience requirement (0-3 thn atau < 4 thn; unverified/tanpa syarat eksplisit tetap lolos)
+    5. Company size & Tier-1 filters (hanya aktif jika only_small_companies eksplisit bernilai True)
+    6. Excluded companies blacklist
+    7. Min/Max Salary filter jika ada
+    8. Not dismissed by candidate
     """
     if preferences is None:
         preferences = get_user_preferences(user_id=user_id)
@@ -487,18 +504,18 @@ def get_all_jobs(
 
     # 5. Filter Ukuran Perusahaan (Company Preferences)
     if eff_only_small:
-        if preferences.preferred_company_sizes:
-            placeholders = ",".join("?" for _ in preferences.preferred_company_sizes)
-            query_parts.append(f"j.company_size_category IN ({placeholders})")
-            params.extend(preferences.preferred_company_sizes)
-        else:
-            query_parts.append("j.company_size_category IN ('small_startup', 'medium_startup', 'agency_studio')")
+        small_sizes = [s for s in (preferences.preferred_company_sizes or []) if s in ('small_startup', 'medium_startup', 'agency_studio')]
+        if not small_sizes:
+            small_sizes = ['small_startup', 'medium_startup', 'agency_studio']
+        placeholders = ",".join("?" for _ in small_sizes)
+        query_parts.append(f"j.company_size_category IN ({placeholders})")
+        params.extend(small_sizes)
 
-    # 6. Exclude Tier-1 Enterprises and Developer Platforms (hanya jika mode small company aktif atau preferensi user)
+    # 6. Exclude Tier-1 Enterprises and Developer Platforms (hanya jika mode small company aktif)
     if eff_only_small:
         if preferences.exclude_tier1_enterprises:
             query_parts.append("(COALESCE(j.is_tier1, 0) = 0 AND (j.company_size_category != 'large_enterprise' OR j.company_size_category IS NULL))")
-        # Exclude Developer Tools & Platforms from primary results (prioritize independent startups across diverse domains)
+        # Exclude Developer Tools & Platforms from small company feed (prioritize independent non-dev startups)
         query_parts.append("(COALESCE(j.is_developer_platform, 0) = 0)")
 
 
@@ -550,16 +567,27 @@ def get_all_jobs(
         term = f"%{search.lower()}%"
         params.extend([term, term, term])
 
+    # 12. Match Score Threshold (> 80% fit)
+    eff_min_score = min_match_score if min_match_score is not None else getattr(preferences, "min_match_score", None)
+    if eff_min_score is not None and eff_min_score > 0:
+        query_parts.append("(j.match_score IS NOT NULL AND j.match_score >= ?)")
+        params.append(eff_min_score)
+
+    # 13. Experience Level Threshold (fewer than 4 years, e.g. <= 3 years)
+    # Lowongan tanpa syarat eksplisit (NULL) tetap diloloskan agar tidak membuang peluang relevan
+    eff_max_exp = max_years_experience if max_years_experience is not None else getattr(preferences, "max_years_experience", None)
+    if eff_max_exp is not None:
+        query_parts.append("(j.min_years_experience IS NULL OR j.min_years_experience <= ?)")
+        params.append(eff_max_exp)
+
     where_clause = " AND ".join(query_parts)
     sql = f"""
     SELECT j.*, a.status as application_status, a.applied_date, a.notes as application_notes,
     (
         COALESCE(j.match_score, 50) +
         (CASE WHEN j.eligibility_status = 'verified_eligible' THEN 40 ELSE 0 END) +
-        (CASE WHEN j.company_size_category IN ('small_startup', 'agency_studio') THEN 25 
-              WHEN j.company_size_category = 'medium_startup' THEN 15 
-              ELSE 0 END) +
-        (CASE WHEN j.is_recommended = 1 THEN 20 ELSE 0 END) -
+        (CASE WHEN j.is_recommended = 1 THEN 20 ELSE 0 END) +
+        (CASE WHEN j.employment_type IN ('full_time', 'contract', 'eor', 'independent_contractor') THEN 10 ELSE 0 END) -
         (CASE WHEN j.ghost_risk_score IS NOT NULL THEN j.ghost_risk_score * 30 ELSE 0 END)
     ) as composite_rank_score
     FROM jobs j
