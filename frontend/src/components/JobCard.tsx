@@ -39,12 +39,12 @@ const formatPublishedDate = (timestamp?: number | null) => {
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
   const diffDays = Math.floor(diffHours / 24)
 
-  if (diffHours < 1) return 'Baru saja'
-  if (diffHours < 24) return `${diffHours} jam lalu`
-  if (diffDays === 1) return 'Kemarin'
-  if (diffDays < 7) return `${diffDays} hari lalu`
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} minggu lalu`
-  return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+  if (diffHours < 1) return 'Just now'
+  if (diffHours < 24) return `${diffHours}h ago`
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return `${diffDays}d ago`
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`
+  return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })
 }
 
 interface JobCardProps {
@@ -273,11 +273,11 @@ export const JobCard: React.FC<JobCardProps> = ({
           </div>
         </div>
 
-        {/* AI Brief Summary (Indonesian) */}
+        {/* AI Brief Summary */}
         {job.summary_id && job.summary_id.length > 0 && (
           <div className="mt-3 pt-3 border-t border-slate-800/60">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-              Ringkasan Kunci (AI Intelligence)
+              Key Insights (AI Intelligence)
             </h4>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-1 text-xs text-slate-300">
               {job.summary_id.map((point, i) => (
@@ -311,12 +311,12 @@ export const JobCard: React.FC<JobCardProps> = ({
         {isExpanded ? (
           <>
             <ChevronUp className="w-3.5 h-3.5" />
-            <span>Sembunyikan Rincian Tanggung Jawab & Kualifikasi</span>
+            <span>Hide Responsibilities & Requirements</span>
           </>
         ) : (
           <>
             <ChevronDown className="w-3.5 h-3.5" />
-            <span>Lihat Rincian Tanggung Jawab, Kualifikasi & Fit Analisis</span>
+            <span>View Responsibilities, Qualifications & Fit Analysis</span>
           </>
         )}
       </button>
@@ -331,7 +331,7 @@ export const JobCard: React.FC<JobCardProps> = ({
               <div>
                 <h5 className="font-bold text-emerald-400 mb-1.5 flex items-center gap-1">
                   <Check className="w-3.5 h-3.5" />
-                  Mengapa Cocok untuk Profil Anda:
+                  Why You're a Good Fit:
                 </h5>
                 <ul className="space-y-1 text-slate-300">
                   {Array.isArray(job.match_reasons) ? job.match_reasons.map((r, i) => (
@@ -349,7 +349,7 @@ export const JobCard: React.FC<JobCardProps> = ({
                 <div>
                   <h5 className="font-bold text-amber-400 mb-1.5 flex items-center gap-1">
                     <AlertTriangle className="w-3.5 h-3.5" />
-                    Potensi Gap / Hal yang Perlu Diperhatikan:
+                    Potential Gaps / Considerations:
                   </h5>
                   <ul className="space-y-1 text-slate-300">
                     {Array.isArray(job.missing_skills) ? job.missing_skills.map((s, i) => (
@@ -370,7 +370,7 @@ export const JobCard: React.FC<JobCardProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
               <h5 className="font-bold text-white mb-2 pb-1 border-b border-slate-800">
-                Tanggung Jawab Utama (Terjemahan)
+                Key Responsibilities
               </h5>
               <ul className="space-y-1.5 text-slate-300">
                 {job.translated_responsibilities?.map((item, i) => (
@@ -384,7 +384,7 @@ export const JobCard: React.FC<JobCardProps> = ({
 
             <div>
               <h5 className="font-bold text-white mb-2 pb-1 border-b border-slate-800">
-                Persyaratan & Kualifikasi (Terjemahan)
+                Requirements & Qualifications
               </h5>
               <ul className="space-y-1.5 text-slate-300">
                 {job.translated_requirements?.map((item, i) => (

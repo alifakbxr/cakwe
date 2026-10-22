@@ -78,7 +78,7 @@ function AppHeader({
           size="icon"
           onClick={() => setIsMobileOpen(true)}
           className="md:hidden h-8 w-8 text-slate-300"
-          aria-label="Buka Menu Navigasi"
+          aria-label="Open Navigation Menu"
         >
           <Menu className="w-4 h-4" />
         </Button>
@@ -117,7 +117,7 @@ function AppHeader({
           onClick={onManualSync}
           disabled={syncing}
           className="h-8 gap-1.5 text-xs font-semibold text-slate-200 border-slate-700/80 hover:border-emerald-500/50"
-          title="Sinkronisasi lowongan dari board ATS publik"
+          title="Synchronize jobs from public ATS job boards"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin text-emerald-400' : 'text-slate-400'}`} />
           <span className="hidden sm:inline">{syncing ? 'Syncing...' : 'Sync Radar'}</span>
@@ -165,7 +165,7 @@ function SidebarNav({
       <SidebarContent>
         {/* Main Workflows */}
         <SidebarGroup>
-          <SidebarGroupLabel>Pencarian & Tracking</SidebarGroupLabel>
+          <SidebarGroupLabel>Discovery & Tracking</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
@@ -201,7 +201,7 @@ function SidebarNav({
 
         {/* AI & Optimization Suite */}
         <SidebarGroup>
-          <SidebarGroupLabel>Aplikasi & Optimasi</SidebarGroupLabel>
+          <SidebarGroupLabel>Applications & Tools</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
@@ -231,7 +231,7 @@ function SidebarNav({
               <span>Worldwide Remote</span>
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              Memfilter lowongan EOR global yang legal & siap mempekerjakan software engineer dari Indonesia.
+              Filtering global remote & EOR roles eligible for developers worldwide.
             </p>
           </div>
         )}

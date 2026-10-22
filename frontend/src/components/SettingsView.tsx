@@ -31,7 +31,7 @@ const DEFAULT_PREFERENCES: UserPreferences = {
   remote_work_types: ["fully_remote", "worldwide", "wfa"],
   preferred_regions: ["Worldwide", "Southeast Asia (SEA)", "APAC", "Remote"],
   experience_levels: ["junior", "mid_level"],
-  min_salary_usd: 12000, // $1000/bulan setara
+  min_salary_usd: 12000, // equivalent to ~$1000/month
   max_salary_usd: null,
   employment_types: ["full_time", "contract"],
   candidate_country: "Indonesia",
@@ -87,7 +87,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
       }
     } catch (err) {
       console.error('Failed to load preferences:', err)
-      setFeedback({ type: 'error', message: 'Gagal memuat preferensi dari server. Menggunakan pengaturan default.' })
+      setFeedback({ type: 'error', message: 'Failed to load preferences from server. Using default settings.' })
     } finally {
       setLoading(false)
     }
@@ -106,35 +106,35 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(preferences)
       })
-      if (!res.ok) throw new Error('Gagal menyimpan preferensi')
+      if (!res.ok) throw new Error('Failed to save preferences')
       const data = await res.json()
       setPreferences(data.preferences)
       setInitialPreferences(data.preferences)
-      setFeedback({ type: 'success', message: 'Preferensi berhasil disimpan secara permanen ke sistem.' })
+      setFeedback({ type: 'success', message: 'Preferences saved successfully to the system.' })
       if (onPreferencesUpdated) onPreferencesUpdated()
     } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message || 'Terjadi kesalahan saat menyimpan preferensi.' })
+      setFeedback({ type: 'error', message: err.message || 'An error occurred while saving preferences.' })
     } finally {
       setSaving(false)
     }
   }
 
   const handleReset = async () => {
-    if (!window.confirm('Kembalikan semua preferensi ke standar bawaan pabrik (Worldwide & SEA, Min Salary $1,000/bln)?')) {
+    if (!window.confirm('Reset all preferences to factory defaults (Worldwide & SEA, Min Salary $1,000/month)?')) {
       return
     }
     try {
       setSaving(true)
       setFeedback(null)
       const res = await fetch('/api/preferences/reset', { method: 'POST' })
-      if (!res.ok) throw new Error('Gagal mereset preferensi')
+      if (!res.ok) throw new Error('Failed to reset preferences')
       const data = await res.json()
       setPreferences(data.preferences)
       setInitialPreferences(data.preferences)
-      setFeedback({ type: 'success', message: 'Preferensi telah dikembalikan ke pengaturan default pabrik.' })
+      setFeedback({ type: 'success', message: 'Preferences have been restored to factory defaults.' })
       if (onPreferencesUpdated) onPreferencesUpdated()
     } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message || 'Gagal mereset preferensi.' })
+      setFeedback({ type: 'error', message: err.message || 'Failed to reset preferences.' })
     } finally {
       setSaving(false)
     }
@@ -145,10 +145,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
       setSyncing(true)
       setFeedback(null)
       const res = await fetch('/api/preferences/rerun-discovery', { method: 'POST' })
-      if (!res.ok) throw new Error('Gagal memicu sinkronisasi radar')
-      setFeedback({ type: 'success', message: 'Penyelarasan radar lowongan baru dengan preferensi Anda sedang berjalan di latar belakang.' })
+      if (!res.ok) throw new Error('Failed to trigger radar sync')
+      setFeedback({ type: 'success', message: 'Job radar re-alignment with your preferences is running in the background.' })
     } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message || 'Gagal memicu sinkronisasi.' })
+      setFeedback({ type: 'error', message: err.message || 'Failed to trigger sync.' })
     } finally {
       setSyncing(false)
     }
@@ -189,7 +189,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
     return (
       <div className="max-w-4xl mx-auto p-12 text-center text-slate-400">
         <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-3 text-indigo-400" />
-        <p className="text-sm">Memuat preferensi pengguna...</p>
+        <p className="text-sm">Loading user preferences...</p>
       </div>
     )
   }
@@ -207,12 +207,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
               <h1 className="text-lg font-bold text-white tracking-tight">Preferences & Discovery Settings</h1>
               {hasUnsavedChanges && (
                 <Badge variant="amber" className="animate-pulse">
-                  Perubahan Belum Disimpan
+                  Unsaved Changes
                 </Badge>
               )}
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Atur kriteria pencarian radar, domisili, ambang gaji, dan karakteristik tim secara real-time.
+              Configure radar search criteria, location, salary thresholds, and team characteristics in real-time.
             </p>
           </div>
         </div>
@@ -225,7 +225,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
             onClick={handleReset}
             disabled={saving}
             className="gap-1.5"
-            title="Kembalikan semua nilai ke default"
+            title="Restore all values to default"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset Default</span>
@@ -237,7 +237,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
             onClick={handleRerunDiscovery}
             disabled={syncing}
             className="gap-1.5"
-            title="Jalankan sinkronisasi dengan kriteria saat ini"
+            title="Run sync with current criteria"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin text-indigo-400' : ''}`} />
             <span>Rerun Discovery</span>
@@ -251,7 +251,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
             className="gap-1.5 shadow-md"
           >
             {saving ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            <span>Simpan Perubahan</span>
+            <span>Save Changes</span>
           </Button>
         </div>
       </Card>
@@ -283,7 +283,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
             <Briefcase className="w-4 h-4 text-indigo-400" />
             <div>
               <h2 className="text-sm font-bold text-white">1. Job Search & Stack Preferences</h2>
-              <p className="text-[11px] text-slate-400">Target peran, stack teknologi, level pengalaman, dan ekspektasi kompensasi.</p>
+              <p className="text-[11px] text-slate-400">Target roles, tech stack, experience level, and compensation expectations.</p>
             </div>
           </div>
           {collapsed.job_search ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
@@ -294,7 +294,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
             {/* Target Roles */}
             <div>
               <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                Target Roles / Posisi:
+                Target Roles / Positions:
               </label>
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {preferences.target_roles.map((role) => (
@@ -309,7 +309,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
               <div className="flex gap-2">
                 <Input
                   type="text"
-                  placeholder="Tambah target peran (contoh: Golang Engineer)..."
+                  placeholder="Add target role (e.g. Golang Engineer)..."
                   value={newRoleInput}
                   onChange={(e) => setNewRoleInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') addTag('target_roles', newRoleInput, setNewRoleInput) }}
@@ -321,7 +321,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
                   onClick={() => addTag('target_roles', newRoleInput, setNewRoleInput)}
                   className="gap-1 h-9"
                 >
-                  <Plus className="w-3.5 h-3.5" /> Tambah
+                  <Plus className="w-3.5 h-3.5" /> Add
                 </Button>
               </div>
             </div>
@@ -344,7 +344,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
               <div className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="Tambah skill baru (contoh: Next.js)..."
+                  placeholder="Add new skill (e.g. Next.js)..."
                   value={newSkillInput}
                   onChange={(e) => setNewSkillInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') addTag('target_skills', newSkillInput, setNewSkillInput) }}
@@ -354,7 +354,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
                   onClick={() => addTag('target_skills', newSkillInput, setNewSkillInput)}
                   className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1"
                 >
-                  <Plus className="w-3.5 h-3.5" /> Tambah
+                  <Plus className="w-3.5 h-3.5" /> Add
                 </button>
               </div>
             </div>
@@ -363,13 +363,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <div>
                 <label className="text-xs font-semibold text-slate-300 block mb-2">
-                  Tingkat Pengalaman (Experience Level):
+                  Experience Level:
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {[
-                    { id: 'junior', label: 'Junior (1-2 thn)' },
-                    { id: 'mid_level', label: 'Mid-level (2-3 thn)' },
-                    { id: 'senior', label: 'Senior (4+ thn)' },
+                    { id: 'junior', label: 'Junior (1-2 yrs)' },
+                    { id: 'mid_level', label: 'Mid-level (2-3 yrs)' },
+                    { id: 'senior', label: 'Senior (4+ yrs)' },
                   ].map((lvl) => {
                     const active = preferences.experience_levels.includes(lvl.id)
                     return (
@@ -392,13 +392,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
 
               <div>
                 <label className="text-xs font-semibold text-slate-300 block mb-2">
-                  Tipe Kontrak (Employment Type):
+                  Employment Type:
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {[
                     { id: 'full_time', label: 'Full-time' },
-                    { id: 'contract', label: 'Kontrak Internasional / EOR' },
-                    { id: 'internship', label: 'Internship / Magang' },
+                    { id: 'contract', label: 'International Contract / EOR' },
+                    { id: 'internship', label: 'Internship' },
                     { id: 'part_time', label: 'Part-time' },
                     { id: 'freelance', label: 'Freelance' }
                   ].map((emp) => {
@@ -425,11 +425,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
             {/* Salary Expectations (USD) */}
             <div className="pt-2 border-t border-slate-800/80">
               <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                Ekspektasi Gaji Minimal:
+                Minimum Salary Expectation:
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                  <span className="text-[11px] text-slate-400 block mb-1">Minimal Bulanan (Est. USD)</span>
+                  <span className="text-[11px] text-slate-400 block mb-1">Monthly Minimum (Est. USD)</span>
                   <div className="flex items-center gap-2">
                     <span className="text-slate-500 font-bold">$</span>
                     <input
@@ -445,13 +445,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
                       }}
                       className="w-full bg-transparent text-sm font-bold text-white focus:outline-none"
                     />
-                    <span className="text-xs text-slate-400">/ bulan</span>
+                    <span className="text-xs text-slate-400">/ month</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 mt-1">Setara $1,000/bln (~Rp 16 Juta/bln)</p>
+                  <p className="text-[10px] text-slate-500 mt-1">Equivalent to ~$1,000/month</p>
                 </div>
 
                 <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                  <span className="text-[11px] text-slate-400 block mb-1">Setara Tahunan (Annual USD)</span>
+                  <span className="text-[11px] text-slate-400 block mb-1">Annual Equivalent (USD)</span>
                   <div className="flex items-center gap-2">
                     <span className="text-slate-500 font-bold">$</span>
                     <input
@@ -467,9 +467,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
                       }}
                       className="w-full bg-transparent text-sm font-bold text-white focus:outline-none"
                     />
-                    <span className="text-xs text-slate-400">/ tahun</span>
+                    <span className="text-xs text-slate-400">/ year</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 mt-1">Hanya memfilter lowongan yang mencantumkan batas gaji</p>
+                  <p className="text-[10px] text-slate-500 mt-1">Only filters jobs that explicitly list a salary range</p>
                 </div>
               </div>
             </div>
@@ -487,7 +487,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
             <Globe className="w-4 h-4 text-emerald-400" />
             <div>
               <h2 className="text-sm font-bold text-white">2. Geographic & Remote Eligibility</h2>
-              <p className="text-[11px] text-slate-400">Prioritas Worldwide & Southeast Asia (SEA), verifikasi legalitas domisili.</p>
+              <p className="text-[11px] text-slate-400">Prioritize Worldwide & Southeast Asia (SEA), verify applicant location eligibility.</p>
             </div>
           </div>
           {collapsed.geographic ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
@@ -498,7 +498,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
             {/* Preferred Regions Multi-Select */}
             <div>
               <label className="text-xs font-semibold text-slate-300 block mb-2">
-                Wilayah Prioritas (Preferred Regions):
+                Preferred Regions:
               </label>
               <div className="flex flex-wrap gap-2">
                 {[
@@ -527,14 +527,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
                 })}
               </div>
               <p className="text-[11px] text-slate-500 mt-2">
-                Rekomendasi default Anda mengutamakan <strong>Worldwide</strong> dan <strong>Southeast Asia (SEA)</strong>.
+                Your default recommendations prioritize <strong>Worldwide</strong> and <strong>Southeast Asia (SEA)</strong>.
               </p>
             </div>
 
             {/* Candidate Country & Timezone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-slate-400 block mb-1">Negara Domisili Pelamar</label>
+                <label className="text-xs font-semibold text-slate-400 block mb-1">Applicant's Country of Residence</label>
                 <input
                   type="text"
                   value={preferences.candidate_country}
@@ -543,7 +543,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-400 block mb-1">Zona Waktu Kandidat</label>
+                <label className="text-xs font-semibold text-slate-400 block mb-1">Candidate Timezone</label>
                 <input
                   type="text"
                   value={preferences.candidate_timezone}
@@ -565,7 +565,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
                 <div>
                   <span className="text-xs font-bold text-white block">Strict Verified Eligibility (Indonesia / Global)</span>
                   <span className="text-[11px] text-slate-400 leading-relaxed block mt-0.5">
-                    Hanya tampilkan lowongan yang memiliki bukti eksplisit (verbatim quote) menerima pelamar dari Indonesia atau Worldwide.
+                    Only show jobs with explicit evidence (verbatim quote) that accept applicants from Indonesia or Worldwide.
                   </span>
                 </div>
               </label>
@@ -578,9 +578,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
                   className="mt-0.5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-0"
                 />
                 <div>
-                  <span className="text-xs font-bold text-white block">Prioritaskan Peluang Tanpa Batas (Worldwide / Anywhere)</span>
+                  <span className="text-xs font-bold text-white block">Prioritize Borderless Opportunities (Worldwide / Anywhere)</span>
                   <span className="text-[11px] text-slate-400 leading-relaxed block mt-0.5">
-                    Menaikkan peringkat lowongan yang berstatus 'Work From Anywhere' di puncak feed radar.
+                    Ranks 'Work From Anywhere' jobs at the top of the radar feed.
                   </span>
                 </div>
               </label>
@@ -599,7 +599,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
             <Building className="w-4 h-4 text-blue-400" />
             <div>
               <h2 className="text-sm font-bold text-white">3. Company Size & Employer Preferences</h2>
-              <p className="text-[11px] text-slate-400">Prioritas tim kecil 10–100 karyawan, agensi digital, blacklist korporasi besar.</p>
+              <p className="text-[11px] text-slate-400">Prefer small teams of 10–100 employees, digital agencies, and block large corporations.</p>
             </div>
           </div>
           {collapsed.company ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
@@ -610,14 +610,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
             {/* Preferred Company Sizes */}
             <div>
               <label className="text-xs font-semibold text-slate-300 block mb-2">
-                Kategori Ukuran Tim yang Diinginkan:
+                Preferred Team Size Categories:
               </label>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { id: 'small_startup', label: 'Small Team (10–50 org)' },
-                  { id: 'medium_startup', label: 'Mid Startup (51–100 org)' },
+                  { id: 'small_startup', label: 'Small Team (10–50 people)' },
+                  { id: 'medium_startup', label: 'Mid Startup (51–100 people)' },
                   { id: 'agency_studio', label: 'Web Agency / Studio' },
-                  { id: 'large_enterprise', label: 'Large Enterprise (>100 org)' }
+                  { id: 'large_enterprise', label: 'Large Enterprise (>100 people)' }
                 ].map((sz) => {
                   const active = preferences.preferred_company_sizes.includes(sz.id)
                   return (
@@ -648,9 +648,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
                   className="mt-0.5 rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-0"
                 />
                 <div>
-                  <span className="text-xs font-bold text-white block">Prioritaskan Perusahaan Kecil (10–100 Karyawan)</span>
+                  <span className="text-xs font-bold text-white block">Prioritize Small Companies (10–100 Employees)</span>
                   <span className="text-[11px] text-slate-400 leading-relaxed block mt-0.5">
-                    Filter feed utama agar berfokus pada startup tahap awal dan studio perangkat lunak yang realistis bagi talenta 1–3 tahun pengalaman.
+                    Filter the main feed to focus on early-stage startups and software studios realistic for 1–3 years of experience.
                   </span>
                 </div>
               </label>
@@ -663,9 +663,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
                   className="mt-0.5 rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-0"
                 />
                 <div>
-                  <span className="text-xs font-bold text-white block">Sembunyikan Korporasi Raksasa / Big Tech (Tier-1)</span>
+                  <span className="text-xs font-bold text-white block">Hide Large Corporations / Big Tech (Tier-1)</span>
                   <span className="text-[11px] text-slate-400 leading-relaxed block mt-0.5">
-                    Mengecualikan perusahaan dengan ribuan karyawan yang memiliki proses seleksi panjang dan rasio penerimaan ketat.
+                    Excludes companies with thousands of employees that have lengthy selection processes and low acceptance rates.
                   </span>
                 </div>
               </label>
@@ -674,7 +674,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
             {/* Excluded Companies Blacklist */}
             <div>
               <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                Blacklist Perusahaan (Excluded Companies):
+                Company Blacklist (Excluded Companies):
               </label>
               {preferences.excluded_companies.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mb-2">
@@ -691,7 +691,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
               <div className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="Ketik nama perusahaan yang ingin diblokir..."
+                  placeholder="Type a company name to block..."
                   value={newExcludedCompInput}
                   onChange={(e) => setNewExcludedCompInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') addTag('excluded_companies', newExcludedCompInput, setNewExcludedCompInput) }}
@@ -701,7 +701,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
                   onClick={() => addTag('excluded_companies', newExcludedCompInput, setNewExcludedCompInput)}
                   className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center gap-1"
                 >
-                  <Plus className="w-3.5 h-3.5" /> Blokir
+                  <Plus className="w-3.5 h-3.5" /> Block
                 </button>
               </div>
             </div>
@@ -719,7 +719,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
             <Clock className="w-4 h-4 text-amber-400" />
             <div>
               <h2 className="text-sm font-bold text-white">4. Freshness, Quality & Sync Schedule</h2>
-              <p className="text-[11px] text-slate-400">Usia lowongan maksimal, proteksi ghost jobs, dan interval sinkronisasi.</p>
+              <p className="text-[11px] text-slate-400">Maximum job age, ghost job protection, and sync interval settings.</p>
             </div>
           </div>
           {collapsed.freshness ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
@@ -731,8 +731,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
               {/* Max Freshness Days */}
               <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs font-semibold text-slate-300">Batas Usia Lowongan</span>
-                  <span className="text-xs font-bold text-indigo-400">{preferences.freshness_days} Hari</span>
+                  <span className="text-xs font-semibold text-slate-300">Maximum Job Age</span>
+                  <span className="text-xs font-bold text-indigo-400">{preferences.freshness_days} Days</span>
                 </div>
                 <input
                   type="range"
@@ -743,7 +743,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
                   onChange={(e) => setPreferences({ ...preferences, freshness_days: parseInt(e.target.value) || 14 })}
                   className="w-full accent-indigo-500"
                 />
-                <p className="text-[10px] text-slate-500 mt-1">Mengeliminasi listing kadaluarsa di atas {preferences.freshness_days} hari</p>
+                <p className="text-[10px] text-slate-500 mt-1">Eliminates expired listings older than {preferences.freshness_days} days</p>
               </div>
 
               {/* Ghost Risk Tolerance */}
@@ -761,15 +761,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
                   onChange={(e) => setPreferences({ ...preferences, max_ghost_risk: parseFloat(e.target.value) || 0.3 })}
                   className="w-full accent-emerald-500"
                 />
-                <p className="text-[10px] text-slate-500 mt-1">Menolak lowongan tanpa rincian stack & tim yang jelas</p>
+                <p className="text-[10px] text-slate-500 mt-1">Rejects jobs without clear stack & team details</p>
               </div>
             </div>
 
             {/* Background Polling Interval */}
             <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-xs font-semibold text-slate-300">Interval Sinkronisasi Latar Belakang</span>
-                <span className="text-xs font-bold text-white">Setiap {preferences.auto_refresh_interval_hours} Jam</span>
+                <span className="text-xs font-semibold text-slate-300">Background Sync Interval</span>
+                <span className="text-xs font-bold text-white">Every {preferences.auto_refresh_interval_hours} Hour{preferences.auto_refresh_interval_hours !== 1 ? 's' : ''}</span>
               </div>
               <input
                 type="range"
@@ -781,7 +781,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
                 className="w-full accent-indigo-500"
               />
               <p className="text-[10px] text-slate-500 mt-1">
-                Frekuensi poller menarik data lowongan baru saat laptop/server aktif.
+                How often the poller fetches new job data while the laptop/server is active.
               </p>
             </div>
           </div>
@@ -793,7 +793,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
         <div className="sticky bottom-4 z-40 bg-[#0f172a]/95 backdrop-blur-md border border-indigo-500/40 rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-4 animate-in slide-in-from-bottom duration-200">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
-            <span className="text-xs font-bold text-white">Anda memiliki perubahan preferensi yang belum disimpan.</span>
+            <span className="text-xs font-bold text-white">You have unsaved preference changes.</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -801,7 +801,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
               onClick={() => setPreferences(initialPreferences)}
               className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold transition"
             >
-              Batal
+              Cancel
             </button>
             <button
               onClick={handleSave}
@@ -809,7 +809,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
               className="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow transition flex items-center gap-1.5"
             >
               {saving ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-              <span>Simpan Sekarang</span>
+              <span>Save Now</span>
             </button>
           </div>
         </div>

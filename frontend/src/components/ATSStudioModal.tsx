@@ -98,7 +98,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
   const [validationReport, setValidationReport] = useState<ATSValidationReport | null>(null)
   const [isValidating, setIsValidating] = useState(false)
 
-  // Jalankan audit validasi lokal instan terhadap struktur CV
+  // Run instant local ATS validation audit against the CV structure
   const runATSValidation = async () => {
     if (!optimizedResult) return
     try {
@@ -131,7 +131,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
             </h3>
           </div>
           <p className="text-xs text-slate-400 mt-0.5">
-            Target Posisi: <span className="text-white font-semibold">{job.title}</span> di <span className="text-emerald-400">{job.company_name}</span>
+            Target Position: <span className="text-white font-semibold">{job.title}</span> at <span className="text-emerald-400">{job.company_name}</span>
           </p>
         </div>
 
@@ -154,7 +154,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
               onClick={() => setBuilderTab('HISTORY')}
               className={`px-3 py-1.5 rounded-md transition ${builderTab === 'HISTORY' ? 'bg-indigo-600 text-white font-semibold' : 'text-slate-400 hover:text-white'}`}
             >
-              Riwayat ({savedHistory.length})
+              History ({savedHistory.length})
             </button>
           </div>
 
@@ -177,7 +177,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                   <Upload className="w-3.5 h-3.5 text-indigo-400" />
-                  1. Unggah File Resume (PDF/DOCX/TXT)
+                  1. Upload Resume File (PDF/DOCX/TXT)
                 </h4>
                 <div 
                   onClick={() => fileInputRef.current?.click()}
@@ -192,10 +192,10 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
                   />
                   <Upload className={`w-7 h-7 mx-auto mb-2 transition ${isUploading ? 'animate-bounce text-indigo-400' : 'text-slate-500 group-hover:text-indigo-400'}`} />
                   <p className="text-xs font-medium text-slate-300">
-                    {isUploading ? 'Sedang mengekstrak teks dokumen...' : uploadFileName ? uploadFileName : 'Klik untuk memilih file PDF / DOCX'}
+                    {isUploading ? 'Extracting document text...' : uploadFileName ? uploadFileName : 'Click to select PDF / DOCX file'}
                   </p>
                   <p className="text-[11px] text-slate-500 mt-1">
-                    Dokumen diproses in-memory tanpa disimpan permanen di server luar.
+                    Document is processed in-memory and never permanently stored on external servers.
                   </p>
                 </div>
               </div>
@@ -203,13 +203,13 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2 mb-2">
                   <FileText className="w-3.5 h-3.5 text-indigo-400" />
-                  2. Tinjau / Edit Teks CV
+                  2. Review / Edit CV Text
                 </h4>
                 <textarea 
                   rows={10}
                   value={rawResumeText}
                   onChange={(e) => setRawResumeText(e.target.value)}
-                  placeholder="Isi teks resume Anda akan muncul di sini. Anda juga dapat mengetik atau mengedit langsung..."
+                  placeholder="Your resume text will appear here. You can also type or edit directly..."
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500 font-mono"
                 />
               </div>
@@ -220,7 +220,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
                 className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <Sparkles className={`w-4 h-4 ${isProcessing ? 'animate-spin' : ''}`} />
-                {isProcessing ? 'AI Sedang Mengoptimasi CV...' : 'Optimasi CV ke Standar ATS Harvard'}
+                {isProcessing ? 'AI is optimizing your CV...' : 'Optimize CV to ATS Harvard Standard'}
               </button>
             </div>
           )}
@@ -228,12 +228,12 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
           {builderTab === 'MODE_B' && (
             <div className="space-y-3.5">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                Lengkapi Profil Singkat
+                Complete Your Profile
               </h4>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-400 block mb-1">Nama Lengkap *</label>
+                  <label className="text-[11px] font-semibold text-slate-400 block mb-1">Full Name *</label>
                   <input 
                     type="text" 
                     value={profileContact.full_name}
@@ -256,7 +256,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-400 block mb-1">Nomor WhatsApp / HP</label>
+                  <label className="text-[11px] font-semibold text-slate-400 block mb-1">WhatsApp / Phone Number</label>
                   <input 
                     type="text" 
                     value={profileContact.phone}
@@ -266,7 +266,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-400 block mb-1">Lokasi Domisili</label>
+                  <label className="text-[11px] font-semibold text-slate-400 block mb-1">Location / City</label>
                   <input 
                     type="text" 
                     value={profileContact.location}
@@ -278,7 +278,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
               </div>
 
               <div>
-                <label className="text-[11px] font-semibold text-slate-400 block mb-1">Keahlian Teknis (Pisahkan dengan koma)</label>
+                <label className="text-[11px] font-semibold text-slate-400 block mb-1">Technical Skills (comma-separated)</label>
                 <input 
                   type="text" 
                   value={skillsInput}
@@ -300,7 +300,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-400 block mb-1">GitHub / Portofolio</label>
+                  <label className="text-[11px] font-semibold text-slate-400 block mb-1">GitHub / Portfolio</label>
                   <input 
                     type="text" 
                     value={profileContact.github_url}
@@ -312,12 +312,12 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
               </div>
 
               <div>
-                <label className="text-[11px] font-semibold text-slate-400 block mb-1">Cerita Riwayat Pengalaman & Proyek</label>
+                <label className="text-[11px] font-semibold text-slate-400 block mb-1">Experience & Project Background</label>
                 <textarea 
                   rows={6}
                   value={backgroundStory}
                   onChange={(e) => setBackgroundStory(e.target.value)}
-                  placeholder="Ceritakan proyek nyata yang pernah Anda bangun, framework yang dipakai, tantangan yang diselesaikan, dan dampaknya..."
+                  placeholder="Describe real projects you've built, frameworks used, challenges solved, and their impact..."
                   className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                 />
               </div>
@@ -328,7 +328,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
                 className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <Sparkles className={`w-4 h-4 ${isProcessing ? 'animate-spin' : ''}`} />
-                {isProcessing ? 'Menyusun Dokumen...' : 'Buat Resume & Cover Letter'}
+                {isProcessing ? 'Building Documents...' : 'Generate Resume & Cover Letter'}
               </button>
             </div>
           )}
@@ -336,10 +336,10 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
           {builderTab === 'HISTORY' && (
             <div className="space-y-3">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                Versi Tersimpan
+                Saved Versions
               </h4>
               {savedHistory.length === 0 ? (
-                <p className="text-xs text-slate-500 italic py-4">Belum ada versi yang disimpan untuk lowongan ini.</p>
+                <p className="text-xs text-slate-500 italic py-4">No saved versions for this job yet.</p>
               ) : (
                 savedHistory.map((item) => (
                   <div
@@ -355,11 +355,11 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
                     className="bg-slate-950 border border-slate-800 hover:border-indigo-500 rounded-xl p-3 cursor-pointer transition"
                   >
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-white">Versi #{item.id}</span>
+                      <span className="font-bold text-white">Version #{item.id}</span>
                       <span className="text-[10px] text-slate-500">{item.created_at}</span>
                     </div>
                     <div className="text-xs text-emerald-400 mt-1 font-semibold">
-                      Skor ATS: {item.analysis_data?.match_score || 0}%
+                      ATS Score: {item.analysis_data?.match_score || 0}%
                     </div>
                   </div>
                 ))
@@ -435,7 +435,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition"
                   >
                     <Save className="w-3.5 h-3.5" />
-                    <span>Simpan</span>
+                    <span>Save</span>
                   </button>
 
                   {documentView === 'RESUME' ? (
@@ -462,7 +462,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition"
                       >
                         {copiedLetter ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                        <span>{copiedLetter ? 'Tersalin' : 'Copy'}</span>
+                        <span>{copiedLetter ? 'Copied!' : 'Copy'}</span>
                       </button>
                       <button
                         onClick={onExportCoverLetterDocx}
@@ -484,7 +484,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition"
                       >
                         <RefreshCw className={`w-3.5 h-3.5 ${isRegeneratingLetter ? 'animate-spin' : ''}`} />
-                        <span>Regenerasi</span>
+                        <span>Regenerate</span>
                       </button>
                     </>
                   )}
@@ -501,12 +501,12 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-white flex items-center gap-1.5">
                             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                            Laporan Audit Keterbacaan ATS:
+                            ATS Readability Audit Report:
                           </span>
                           <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
                             validationReport.score >= 85 ? 'bg-emerald-950 text-emerald-300 border border-emerald-700' : 'bg-amber-950 text-amber-300 border border-amber-700'
                           }`}>
-                            Skor Struktur: {validationReport.score}/100
+                            Structure Score: {validationReport.score}/100
                           </span>
                         </div>
                         {validationReport.issues.length > 0 ? (
@@ -517,7 +517,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
                           </ul>
                         ) : (
                           <p className="text-emerald-400 flex items-center gap-1">
-                            <Check className="w-3.5 h-3.5" /> Format dokumen bersih, terukur, dan 100% kompatibel dengan parser ATS modern.
+                            <Check className="w-3.5 h-3.5" /> Document format is clean, structured, and 100% compatible with modern ATS parsers.
                           </p>
                         )}
                       </div>
@@ -526,7 +526,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
                     {/* Keyword Chips */}
                     <div className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs space-y-2 print:hidden">
                       <div className="flex flex-wrap items-center gap-1">
-                        <span className="text-slate-400 font-semibold mr-1">Keywords ATS:</span>
+                        <span className="text-slate-400 font-semibold mr-1">ATS Keywords:</span>
                         {(optimizedResult.analysis?.matched_keywords || []).map((kw, i) => (
                           <span key={i} className="bg-emerald-950/70 text-emerald-300 border border-emerald-800/60 px-1.5 py-0.5 rounded text-[10px]">
                             {kw}
@@ -535,7 +535,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
                       </div>
                       {Boolean(optimizedResult.analysis?.missing_skills?.length) && (
                         <div className="flex flex-wrap items-center gap-1 pt-2 border-t border-slate-900">
-                          <span className="text-amber-400 font-semibold mr-1">Gap Skill:</span>
+                          <span className="text-amber-400 font-semibold mr-1">Skill Gaps:</span>
                           {(optimizedResult.analysis?.missing_skills || []).map((sk, i) => (
                             <span key={i} className="bg-amber-950/70 text-amber-300 border border-amber-800/60 px-1.5 py-0.5 rounded text-[10px]">
                               {sk}
@@ -701,7 +701,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
                     </div>
 
                     <div className="mb-4 text-slate-600">
-                      <p>{new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                      <p>{new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                       <p className="mt-2 font-bold text-slate-900">Hiring Manager</p>
                       <p>{job.company_name}</p>
                     </div>
@@ -714,7 +714,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
                     />
 
                     <div className="mt-6 pt-4 border-t border-slate-200 text-slate-700 text-xs">
-                      <p>Hormat saya,</p>
+                      <p>Sincerely,</p>
                       <p className="font-bold mt-4">{optimizedResult.resume.contact.full_name}</p>
                     </div>
                   </div>
@@ -724,9 +724,9 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-500 print:hidden">
               <FileText className="w-12 h-12 text-slate-700 mb-3" />
-              <h4 className="text-sm font-semibold text-slate-300">Belum Ada Dokumen</h4>
+              <h4 className="text-sm font-semibold text-slate-300">No Document Yet</h4>
               <p className="text-xs text-slate-500 mt-1 max-w-sm">
-                Unggah file CV atau isi form di sebelah kiri untuk menghasilkan resume ATS dan cover letter instan.
+                Upload a CV file or fill out the form on the left to generate an ATS resume and cover letter instantly.
               </p>
             </div>
           )}

@@ -37,7 +37,7 @@ export const TrackerModal: React.FC<TrackerModalProps> = ({
           <div>
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Bookmark className="w-4 h-4 text-indigo-400" />
-              Kelola Status Lamaran
+              Manage Application Status
             </h3>
             <p className="text-xs text-slate-400 mt-0.5 truncate max-w-xs">{job.title}</p>
           </div>
@@ -53,24 +53,24 @@ export const TrackerModal: React.FC<TrackerModalProps> = ({
 
         <div className="space-y-4 text-xs">
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Tahap Progres</label>
+            <label className="block text-slate-300 font-semibold mb-1">Application Stage</label>
             <select
               value={trackingForm.status}
               onChange={(e) => setTrackingForm({...trackingForm, status: e.target.value})}
               className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
-              <option value="saved">⭐ Tersimpan (Saved / Wishlist)</option>
-              <option value="applied">📝 Sudah Dilamar (Applied)</option>
-              <option value="interviewing">🎯 Proses Interview</option>
+              <option value="saved">⭐ Saved / Wishlist</option>
+              <option value="applied">📝 Applied</option>
+              <option value="interviewing">🎯 Interviewing</option>
               <option value="assessment">💻 Technical Assessment</option>
-              <option value="offer">🎉 Mendapat Penawaran (Offer)</option>
-              <option value="rejected">❌ Belum Berhasil (Rejected)</option>
-              <option value="withdrawn">⛔ Ditarik (Withdrawn)</option>
+              <option value="offer">🎉 Offer Received</option>
+              <option value="rejected">❌ Rejected</option>
+              <option value="withdrawn">⛔ Withdrawn</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Tanggal Melamar</label>
+            <label className="block text-slate-300 font-semibold mb-1">Applied Date</label>
             <Input
               type="date"
               value={trackingForm.applied_date}
@@ -80,12 +80,12 @@ export const TrackerModal: React.FC<TrackerModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-slate-300 font-semibold mb-1">Catatan Pribadi</label>
+            <label className="block text-slate-300 font-semibold mb-1">Private Notes</label>
             <textarea
               rows={4}
               value={trackingForm.notes}
               onChange={(e) => setTrackingForm({...trackingForm, notes: e.target.value})}
-              placeholder="Catatan tahapan, kontak recruiter, ekspektasi salary..."
+              placeholder="Stage notes, recruiter contact, salary expectations..."
               className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
             />
           </div>
@@ -96,14 +96,14 @@ export const TrackerModal: React.FC<TrackerModalProps> = ({
               size="sm"
               onClick={onClose}
             >
-              Batal
+              Cancel
             </Button>
             <Button
               variant="primary"
               size="sm"
               onClick={onSave}
             >
-              Simpan Status
+              Save Status
             </Button>
           </div>
         </div>

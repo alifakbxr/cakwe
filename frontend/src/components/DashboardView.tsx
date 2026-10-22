@@ -50,10 +50,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span>Strict Verified Worldwide & Small Companies</span>
           </Badge>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight leading-tight">
-            Pusat Komando Karir Remote Global
+            Global Remote Career Command Center
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
-            Temukan lowongan kerja remote 100% yang menerima kandidat dari Indonesia, kelola progres lamaran dalam Kanban board terstruktur, dan optimasi resume berstandar Harvard/MIT.
+            Discover 100% remote job opportunities accepting worldwide candidates, manage your application pipeline in a structured Kanban board, and optimize ATS resumes following Harvard/MIT standards.
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <Button
@@ -62,7 +62,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               size="default"
               className="gap-2 font-semibold shadow-md"
             >
-              <span>Jelajahi Lowongan Terverifikasi</span>
+              <span>Explore Verified Jobs</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Button>
             <Button
@@ -71,7 +71,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               size="default"
               className="gap-2 font-semibold"
             >
-              <span>Buka Kanban Pipeline ({trackedJobs.length})</span>
+              <span>Open Kanban Pipeline ({trackedJobs.length})</span>
             </Button>
           </div>
         </div>
@@ -87,7 +87,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="text-2xl font-bold text-white mt-2">
             {stats?.verified_small_company_jobs ?? 0}
           </div>
-          <div className="text-[11px] text-slate-500 mt-1">Boutique, Studios & Startups</div>
+          <div className="text-[11px] text-slate-500 mt-1">Boutiques, Studios & Startups</div>
         </Card>
 
         <Card className="p-4 bg-[#0f172a] border-slate-800">
@@ -98,12 +98,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="text-2xl font-bold text-emerald-400 mt-2">
             {stats?.verified_eligible_jobs ?? 0}
           </div>
-          <div className="text-[11px] text-slate-500 mt-1">Bukti kontrak EOR / Global</div>
+          <div className="text-[11px] text-slate-500 mt-1">Proof of EOR / Global contract</div>
         </Card>
 
         <Card className="p-4 bg-[#0f172a] border-slate-800">
           <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span>Total Lamaran Aktif</span>
+            <span>Active Applications</span>
             <Bookmark className="w-4 h-4 text-indigo-400" />
           </div>
           <div className="text-2xl font-bold text-white mt-2">
@@ -116,7 +116,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         <Card className="p-4 bg-[#0f172a] border-slate-800">
           <div className="flex items-center justify-between text-slate-400 text-xs">
-            <span>Total Peluang Dipantau</span>
+            <span>Total Tracked Jobs</span>
             <TrendingUp className="w-4 h-4 text-amber-400" />
           </div>
           <div className="text-2xl font-bold text-white mt-2">
@@ -134,8 +134,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <Card className="border-slate-800 bg-[#0f172a]">
             <CardHeader className="flex flex-row items-center justify-between p-4 pb-3">
               <div>
-                <CardTitle className="text-sm font-bold text-white">Rekomendasi Utama Terverifikasi</CardTitle>
-                <CardDescription className="text-xs text-slate-400">Peluang kerja remote dengan bukti kelayakan tertinggi untuk profil Anda.</CardDescription>
+                <CardTitle className="text-sm font-bold text-white">Top Verified Recommendations</CardTitle>
+                <CardDescription className="text-xs text-slate-400">Remote roles with highest verified eligibility proof matching your profile.</CardDescription>
               </div>
               <Button
                 variant="ghost"
@@ -143,14 +143,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 onClick={() => onNavigateTab('RADAR')}
                 className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold gap-1 h-8 px-2"
               >
-                <span>Lihat Semua</span>
+                <span>View All</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Button>
             </CardHeader>
             <CardContent className="p-4 pt-1 space-y-3">
               {topRecommendations.length === 0 ? (
                 <div className="text-center py-10 rounded-lg bg-slate-950/60 border border-slate-800/80 p-6">
-                  <p className="text-xs text-slate-400">Belum ada rekomendasi aktif. Jalankan sinkronisasi untuk memuat lowongan terbaru.</p>
+                  <p className="text-xs text-slate-400">No active recommendations yet. Run radar sync to discover fresh job openings.</p>
                 </div>
               ) : (
                 topRecommendations.map((job) => (
@@ -217,7 +217,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <CardHeader className="flex flex-row items-center justify-between p-4 pb-2 border-b border-slate-800/80">
               <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                 <Bookmark className="w-3.5 h-3.5 text-indigo-400" />
-                Status Pipeline Lamaran
+                Application Pipeline
               </CardTitle>
               <Button
                 variant="link"
@@ -225,7 +225,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 onClick={() => onNavigateTab('KANBAN')}
                 className="text-[11px] text-indigo-400 hover:text-indigo-300 p-0 h-auto"
               >
-                Buka Board
+                Open Board
               </Button>
             </CardHeader>
 
@@ -260,10 +260,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <Card className="border-slate-800/80 bg-slate-950 p-4 space-y-2">
             <span className="font-bold text-white flex items-center gap-1.5 text-xs">
               <Clock className="w-3.5 h-3.5 text-emerald-400" />
-              Siklus Poller Otomatis:
+              Automatic Poller Cycle:
             </span>
             <p className="text-slate-400 leading-relaxed text-[11px]">
-              Sistem secara otomatis menarik lowongan baru setiap 5 jam dari board ATS publik yang terverifikasi. Hanya posisi dengan bukti kontrak EOR/Worldwide dan terbit dalam 14 hari terakhir yang ditampilkan.
+              The system automatically pulls new jobs every 5 hours from verified public ATS boards. Only positions with verified EOR/worldwide contract eligibility published within the freshness window are displayed.
             </p>
           </Card>
         </div>

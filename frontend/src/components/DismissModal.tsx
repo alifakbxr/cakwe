@@ -20,13 +20,13 @@ export const DismissModal: React.FC<DismissModalProps> = ({
   onDismiss
 }) => {
   const reasons = [
-    { id: 'not_remote', label: 'Bukan Remote Sebenarnya / Dibatasi Region Lain' },
-    { id: 'wrong_seniority', label: 'Seniority Terlalu Tinggi / Rendah (> 4-5 thn atau Manager)' },
-    { id: 'missing_skills', label: 'Gap Teknologi Terlalu Jauh (.NET/Java/C++)' },
-    { id: 'company_too_large', label: 'Korporasi Besar (Bukan Small Company / Studio)' },
-    { id: 'salary_too_low', label: 'Kompensasi Tidak Sesuai' },
-    { id: 'job_already_closed', label: 'Lowongan Sudah Tutup / Expired' },
-    { id: 'other', label: 'Lainnya' },
+    { id: 'not_remote', label: 'Not Truly Remote / Restricted to Other Regions' },
+    { id: 'wrong_seniority', label: 'Seniority Level Too High / Low (> 4-5 yrs or Lead/Manager)' },
+    { id: 'missing_skills', label: 'Tech Stack Gap Too Wide (.NET/Java/C++)' },
+    { id: 'company_too_large', label: 'Large Enterprise (Not a Small Company / Studio)' },
+    { id: 'salary_too_low', label: 'Compensation Out of Range' },
+    { id: 'job_already_closed', label: 'Role Already Closed / Expired' },
+    { id: 'other', label: 'Other Reason' },
   ]
 
   return (
@@ -36,7 +36,7 @@ export const DismissModal: React.FC<DismissModalProps> = ({
           <div>
             <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
               <EyeOff className="w-4 h-4 text-red-400" />
-              Sembunyikan Lowongan
+              Dismiss Job
             </h3>
             <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">
               {job.title} — {job.company_name}
@@ -54,7 +54,7 @@ export const DismissModal: React.FC<DismissModalProps> = ({
 
         <div className="space-y-3">
           <label className="text-xs font-medium text-slate-300">
-            Pilih alasan lowongan ini tidak cocok untuk profil Anda:
+            Select why this job is not a fit for your profile:
           </label>
           <div className="space-y-2">
             {reasons.map((item) => (
@@ -86,14 +86,14 @@ export const DismissModal: React.FC<DismissModalProps> = ({
             size="sm"
             onClick={onClose}
           >
-            Batal
+            Cancel
           </Button>
           <Button
             variant="destructive"
             size="sm"
             onClick={onDismiss}
           >
-            Sembunyikan & Simpan Feedback
+            Dismiss & Save Feedback
           </Button>
         </div>
       </Card>

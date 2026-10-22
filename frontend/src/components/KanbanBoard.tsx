@@ -68,13 +68,13 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
             <span>Job Tracker Kanban Board</span>
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Tarik kartu (drag & drop) atau gunakan menu dropdown status di setiap kartu untuk memperbarui tahapan lamaran kerja.
+            Drag and drop cards or use the status dropdown on each card to update application stages.
           </p>
         </div>
 
         <div className="flex items-center gap-2 text-xs font-medium text-slate-400 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 shrink-0">
-          <span>Total Aktif:</span>
-          <span className="text-emerald-400 font-bold">{jobs.filter(j => j.application_status).length} Lowongan Terlacak</span>
+          <span>Total Active:</span>
+          <span className="text-emerald-400 font-bold">{jobs.filter(j => j.application_status).length} Tracked Roles</span>
         </div>
       </Card>
 
@@ -108,7 +108,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
               <div className="p-2 space-y-2.5 flex-1 overflow-y-auto">
                 {colJobs.length === 0 ? (
                   <div className="text-center py-10 px-2 text-[11px] text-slate-500 border border-dashed border-slate-800/80 rounded-lg">
-                    Belum ada kartu
+                    No cards yet
                   </div>
                 ) : (
                   colJobs.map((job) => (

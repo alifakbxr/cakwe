@@ -263,13 +263,13 @@ export default function App() {
         method: 'POST',
         body: formData,
       })
-      if (!res.ok) throw new Error('Gagal mengekstrak file')
+      if (!res.ok) throw new Error('Failed to extract file')
       const data = await res.json()
       setRawResumeText(data.text)
       setUploadFileName(file.name)
       localStorage.setItem('user_resume_draft', data.text)
     } catch (err: any) {
-      alert(`Gagal membaca file: ${err.message}`)
+      alert(`Failed to read file: ${err.message}`)
     } finally {
       setIsUploading(false)
     }
@@ -287,7 +287,7 @@ export default function App() {
           resume_text: rawResumeText
         })
       })
-      if (!res.ok) throw new Error('Gagal mengoptimasi resume')
+      if (!res.ok) throw new Error('Failed to optimize resume')
       const data = await res.json()
       setOptimizedResult(data)
       setEditableCoverLetter(data.cover_letter || '')
@@ -313,7 +313,7 @@ export default function App() {
           skills: skillsArray
         })
       })
-      if (!res.ok) throw new Error('Gagal membangun resume')
+      if (!res.ok) throw new Error('Failed to build resume')
       const data = await res.json()
       setOptimizedResult(data)
       setEditableCoverLetter(data.cover_letter || '')
@@ -340,11 +340,11 @@ export default function App() {
         })
       })
       if (res.ok) {
-        alert('Resume versi ini berhasil disimpan ke database!')
+        alert('Resume version saved successfully!')
         loadHistory(activeJobForBuilder.id)
       }
     } catch (err) {
-      alert('Gagal menyimpan versi')
+      alert('Failed to save resume version')
     }
   }
 
@@ -368,7 +368,7 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(optimizedResult.resume)
       })
-      if (!res.ok) throw new Error('Gagal membuat DOCX')
+      if (!res.ok) throw new Error('Failed to generate DOCX')
       const blob = await res.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -393,7 +393,7 @@ export default function App() {
           cover_letter_text: editableCoverLetter
         })
       })
-      if (!res.ok) throw new Error('Gagal membuat DOCX Cover Letter')
+      if (!res.ok) throw new Error('Failed to generate DOCX Cover Letter')
       const blob = await res.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -423,7 +423,7 @@ export default function App() {
           resume: optimizedResult.resume
         })
       })
-      if (!res.ok) throw new Error('Gagal regenerasi cover letter')
+      if (!res.ok) throw new Error('Failed to regenerate cover letter')
       const data = await res.json()
       setEditableCoverLetter(data.cover_letter)
       const updated = { ...optimizedResult }
@@ -444,7 +444,7 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(optimizedResult.resume)
       })
-      if (!res.ok) throw new Error('Gagal membuat PDF Resume')
+      if (!res.ok) throw new Error('Failed to generate PDF Resume')
       const blob = await res.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -469,7 +469,7 @@ export default function App() {
           cover_letter_text: editableCoverLetter
         })
       })
-      if (!res.ok) throw new Error('Gagal membuat PDF Cover Letter')
+      if (!res.ok) throw new Error('Failed to generate PDF Cover Letter')
       const blob = await res.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -546,7 +546,7 @@ export default function App() {
               ATS Resume & Cover Letter Studio
             </h2>
             <p className="text-xs text-slate-400 mt-1">
-              Pilih salah satu lowongan di bawah untuk mulai mengoptimasi CV dan menyusun Cover Letter terarah berstandar Harvard/MIT.
+              Select one of the opportunities below to optimize your CV and generate a targeted Cover Letter following Harvard/MIT standards.
             </p>
 
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -570,7 +570,7 @@ export default function App() {
                   <div className="mt-3 flex items-center justify-between text-[11px]">
                     <span className="text-emerald-400 font-bold">{job.match_score || 0}% Fit</span>
                     <span className="text-indigo-400 font-semibold flex items-center gap-1">
-                      Buka Studio &rarr;
+                      Open Studio &rarr;
                     </span>
                   </div>
                 </Card>
@@ -626,12 +626,12 @@ export default function App() {
                     ? 'bg-emerald-950/40 border-emerald-500/50 shadow-sm ring-1 ring-emerald-500/30'
                     : 'bg-[#0f172a] border-slate-800 hover:border-slate-700'
                 }`}
-                title="Klik untuk tampilkan semua lowongan terverifikasi Indonesia"
+                title="Click to show all verified roles open to Indonesia/Worldwide"
               >
                 <div className="text-xs text-emerald-400 font-medium flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4" />
-                    Terverifikasi Domisili Indonesia
+                    Verified Worldwide / Indonesia
                   </span>
                   <span className="text-[10px] text-emerald-400/80 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/60 font-mono">
                     Total: {stats.verified_eligible_jobs}
@@ -640,7 +640,7 @@ export default function App() {
                 <div className="text-2xl font-bold text-emerald-400 mt-1">
                   {stats.verified_eligible_jobs}
                 </div>
-                <div className="text-[11px] text-slate-400 mt-1">100% Remote / Bukti Kontrak EOR Worldwide</div>
+                <div className="text-[11px] text-slate-400 mt-1">100% Remote / Verified Worldwide EOR Contract</div>
               </Card>
 
               <Card 
@@ -655,33 +655,33 @@ export default function App() {
                     ? 'bg-indigo-950/40 border-indigo-500/50 shadow-sm ring-1 ring-indigo-500/30' 
                     : 'bg-[#0f172a] border-slate-800 hover:border-slate-700'
                 }`}
-                title="Klik untuk filter kecocokan tinggi (Fit > 80% & Exp 0-3 thn)"
+                title="Click to filter high fit matches (Fit > 80% & Exp 0-3 yrs)"
               >
                 <div className="text-xs text-indigo-400 font-medium flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4" />
-                    Rekomendasi Akurat (Fit &gt; 80%)
+                    Accurate Matches (Fit &gt; 80%)
                   </span>
                   <span className="text-[10px] text-indigo-300/80 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/60 font-mono">
-                    Target Utama
+                    Top Priority
                   </span>
                 </div>
                 <div className="text-2xl font-bold text-white mt-1">
                   {jobs.filter(j => (j.match_score ?? 0) >= 80).length}
                 </div>
-                <div className="text-[11px] text-slate-400 mt-1">Pengalaman 0–3 thn, stack selaras</div>
+                <div className="text-[11px] text-slate-400 mt-1">0–3 yrs experience, aligned stack</div>
               </Card>
 
               <Card className="p-4 bg-[#0f172a] border-slate-800">
                 <div className="text-xs text-slate-400 font-medium flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
                     <Briefcase className="w-4 h-4 text-slate-400" />
-                    Total Lowongan Terpantau
+                    Total Tracked Opportunities
                   </span>
-                  <span className="text-[10px] text-slate-500 font-mono">14 Hari</span>
+                  <span className="text-[10px] text-slate-500 font-mono">14 Days</span>
                 </div>
                 <div className="text-2xl font-bold text-white mt-1">{stats.total_jobs}</div>
-                <div className="text-[11px] text-slate-500 mt-1">Multi-ATS Public Feeds (Aktif & Terpindai)</div>
+                <div className="text-[11px] text-slate-500 mt-1">Multi-ATS Public Feeds (Active & Scanned)</div>
               </Card>
             </div>
           )}
@@ -709,7 +709,7 @@ export default function App() {
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 z-10" />
                 <Input 
                   type="text"
-                  placeholder="Cari posisi, skill, perusahaan..."
+                  placeholder="Search role, skill, company..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 pr-3 h-9"
@@ -720,7 +720,7 @@ export default function App() {
             {/* Filter checkboxes & application subtabs */}
             <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800/80">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs text-slate-400 font-medium">Status Kelayakan:</span>
+                <span className="text-xs text-slate-400 font-medium">Eligibility Status:</span>
                 <Button
                   size="sm"
                   variant={onlyVerified ? "default" : "outline"}
@@ -728,7 +728,7 @@ export default function App() {
                   className="gap-1.5 h-7 text-xs"
                 >
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Verified Eligible (Indonesia Open)</span>
+                  <span>Verified Eligible (Worldwide Open)</span>
                 </Button>
                 <Button
                   size="sm"
@@ -736,7 +736,7 @@ export default function App() {
                   onClick={() => setOnlyVerified(false)}
                   className="gap-1.5 h-7 text-xs"
                 >
-                  <span>Antrean Perlu Verifikasi (Needs Review)</span>
+                  <span>Review Queue (Needs Review)</span>
                 </Button>
               </div>
 
@@ -754,7 +754,7 @@ export default function App() {
                     className="rounded border-emerald-600 text-emerald-500 focus:ring-0"
                   />
                   <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                  Fit &gt; 80% (Semua Perusahaan)
+                  Fit &gt; 80% (All Companies)
                 </label>
 
                 {/* Experience <= 3 yrs Filter */}
@@ -770,7 +770,7 @@ export default function App() {
                     className="rounded border-cyan-600 text-cyan-500 focus:ring-0"
                   />
                   <Clock className="w-3.5 h-3.5 text-cyan-400" />
-                  0–3 Thn Pengalaman
+                  0–3 Yrs Experience
                 </label>
 
                 {/* Small Companies Filter */}
@@ -786,7 +786,7 @@ export default function App() {
                     className="rounded border-blue-600 text-blue-500 focus:ring-0"
                   />
                   <Building className="w-3.5 h-3.5 text-blue-400" />
-                  Hanya Startup Kecil (10–100)
+                  Small Startups Only (10–100)
                 </label>
 
                 <label className="flex items-center gap-1.5 cursor-pointer text-slate-400 hover:text-slate-200">
@@ -796,19 +796,19 @@ export default function App() {
                     onChange={e => setShowClosed(e.target.checked)}
                     className="rounded border-slate-700 text-indigo-600 focus:ring-0"
                   />
-                  Tampilkan lowongan tutup
+                  Show closed jobs
                 </label>
 
                 {/* Sort Order Toggle */}
                 <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 p-0.5 rounded-lg ml-auto">
-                  <span className="text-[11px] text-slate-400 px-2 font-medium">Urutkan:</span>
+                  <span className="text-[11px] text-slate-400 px-2 font-medium">Sort by:</span>
                   <Button
                     size="sm"
                     variant={sortBy === 'latest' ? 'default' : 'ghost'}
                     onClick={() => setSortBy('latest')}
                     className="h-6 px-2.5 text-[11px]"
                   >
-                    Terbaru
+                    Latest
                   </Button>
                   <Button
                     size="sm"
@@ -816,7 +816,7 @@ export default function App() {
                     onClick={() => setSortBy('fit')}
                     className="h-6 px-2.5 text-[11px]"
                   >
-                    Kecocokan (Fit)
+                    Best Fit
                   </Button>
                 </div>
               </div>
@@ -829,10 +829,10 @@ export default function App() {
               <div className="flex items-center gap-2.5 text-slate-300">
                 <span className="flex h-2 w-2 rounded-full bg-indigo-400 animate-pulse" />
                 <span>
-                  Filter Aktif: Mengutamakan startup independen. Menyembunyikan{' '}
-                  {diagnostics.hidden_by_developer_platform ? <strong>{diagnostics.hidden_by_developer_platform} dev-tool platform</strong> : null}
-                  {diagnostics.hidden_by_large_enterprise > 0 ? `, ${diagnostics.hidden_by_large_enterprise} korporasi Tier-1` : null}
-                  {diagnostics.hidden_by_freshness > 0 ? `, dan ${diagnostics.hidden_by_freshness} lowongan &gt; ${diagnostics.freshness_days_active} hari.` : '.'}
+                  Active Filter: Prioritizing independent startups. Hiding{' '}
+                  {diagnostics.hidden_by_developer_platform ? <strong>{diagnostics.hidden_by_developer_platform} dev-tool platforms</strong> : null}
+                  {diagnostics.hidden_by_large_enterprise > 0 ? `, ${diagnostics.hidden_by_large_enterprise} Tier-1 enterprises` : null}
+                  {diagnostics.hidden_by_freshness > 0 ? `, and ${diagnostics.hidden_by_freshness} jobs &gt; ${diagnostics.freshness_days_active} days old.` : '.'}
                 </span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -843,7 +843,7 @@ export default function App() {
                     onClick={() => setOnlySmallCompanies(false)}
                     className="h-7 text-indigo-300 border-slate-700"
                   >
-                    Tampilkan Semua Kategori
+                    Show All Categories
                   </Button>
                 )}
                 <Button
@@ -858,7 +858,7 @@ export default function App() {
                   }}
                   className="h-7 bg-indigo-600/40 hover:bg-indigo-600/60 text-indigo-200 border border-indigo-500/40"
                 >
-                  Reset Filter Feed
+                  Reset Feed Filters
                 </Button>
               </div>
             </div>
@@ -868,15 +868,15 @@ export default function App() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1 pt-2">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <span>Daftar Lowongan</span>
+                <span>Job Openings</span>
                 <Badge variant="secondary" className="font-mono text-xs px-2 py-0.5">
-                  {filteredJobs.length} posisi
+                  {filteredJobs.length} roles
                 </Badge>
               </h3>
 
               {stats && filteredJobs.length !== (onlyVerified ? stats.verified_eligible_jobs : stats.total_jobs) && (
                 <span className="text-xs text-slate-400">
-                  (difilter dari total <strong className="text-emerald-400">{onlyVerified ? stats.verified_eligible_jobs : stats.total_jobs}</strong> {onlyVerified ? 'terverifikasi' : 'terpantau'})
+                  (filtered from <strong className="text-emerald-400">{onlyVerified ? stats.verified_eligible_jobs : stats.total_jobs}</strong> {onlyVerified ? 'verified' : 'total'} opportunities)
                 </span>
               )}
             </div>
@@ -895,7 +895,7 @@ export default function App() {
                 }}
                 className="h-7 text-xs text-indigo-300 border-slate-700 hover:bg-slate-800"
               >
-                Reset Filter (Tampilkan Semua {onlyVerified ? stats?.verified_eligible_jobs : stats?.total_jobs})
+                Reset Filters (Show All {onlyVerified ? stats?.verified_eligible_jobs : stats?.total_jobs})
               </Button>
             )}
           </div>
@@ -904,14 +904,14 @@ export default function App() {
           {loading ? (
             <div className="text-center py-24 bg-[#0f172a] border border-slate-800 rounded-xl">
               <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin mx-auto mb-3" />
-              <p className="text-xs text-slate-400 font-medium">Memuat lowongan terverifikasi...</p>
+              <p className="text-xs text-slate-400 font-medium">Loading verified opportunities...</p>
             </div>
           ) : filteredJobs.length === 0 ? (
             <div className="text-center py-20 bg-[#0f172a] border border-slate-800 rounded-xl p-8">
               <Briefcase className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-              <h3 className="text-sm font-semibold text-white">Tidak ada lowongan yang sesuai kriteria</h3>
+              <h3 className="text-sm font-semibold text-white">No jobs match your criteria</h3>
               <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                Coba sesuaikan filter pencarian atau klik tombol "Sync Radar" untuk mengambil data terbaru.
+                Try adjusting your search filters or click "Sync Radar" to fetch the latest opportunities.
               </p>
             </div>
           ) : (
