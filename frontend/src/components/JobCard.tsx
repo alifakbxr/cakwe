@@ -31,6 +31,22 @@ const formatEmploymentType = (type?: string | null) => {
   }
 }
 
+const formatPublishedDate = (timestamp?: number | null) => {
+  if (!timestamp) return null
+  const date = new Date(timestamp * 1000)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+  const diffDays = Math.floor(diffHours / 24)
+
+  if (diffHours < 1) return 'Baru saja'
+  if (diffHours < 24) return `${diffHours} jam lalu`
+  if (diffDays === 1) return 'Kemarin'
+  if (diffDays < 7) return `${diffDays} hari lalu`
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} minggu lalu`
+  return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+}
+
 interface JobCardProps {
   job: Job
   isExpanded: boolean
@@ -145,6 +161,14 @@ export const JobCard: React.FC<JobCardProps> = ({
                   className="text-[11px] font-bold"
                 >
                   {job.match_score}% Candidate Fit
+                </Badge>
+              )}
+
+              {/* Publication Date Badge */}
+              {formatPublishedDate(job.published_at) && (
+                <Badge variant="outline" className="gap-1 text-[11px] font-medium border-slate-700/80 text-emerald-400/90 bg-emerald-950/30">
+                  <Clock className="w-3 h-3 text-emerald-400" />
+                  {formatPublishedDate(job.published_at)}
                 </Badge>
               )}
 

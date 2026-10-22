@@ -160,6 +160,7 @@ def list_jobs(
     min_salary: Optional[float] = Query(None, description="Filter gaji minimal tahunan USD"),
     min_score: Optional[int] = Query(None, description="Filter minimal match score (misal: 80)"),
     max_exp: Optional[int] = Query(None, description="Filter maksimal tahun pengalaman (misal: 3)"),
+    sort_by: Optional[str] = Query("latest", description="Urutan daftar lowongan: 'latest' (terbaru) atau 'score'/'fit' (skor kecocokan)"),
 ):
     """Mengambil daftar lowongan yang telah lolos Stage A & User Preferences:
     - Verified Eligible dari Indonesia / Worldwide
@@ -176,6 +177,7 @@ def list_jobs(
     eff_ghost_risk = max_ghost_risk if max_ghost_risk is not None else user_prefs.max_ghost_risk
     eff_min_score = min_score if min_score is not None else getattr(user_prefs, "min_match_score", None)
     eff_max_exp = max_exp if max_exp is not None else getattr(user_prefs, "max_years_experience", None)
+    eff_sort_by = sort_by or "latest"
 
     # Override min_salary di preferences jika diberikan di query
     if min_salary is not None:
@@ -189,6 +191,7 @@ def list_jobs(
         search=search,
         min_match_score=eff_min_score,
         max_years_experience=eff_max_exp,
+        sort_by=eff_sort_by,
         preferences=user_prefs,
     )
     parsed = [parse_job_row(j) for j in jobs]

@@ -438,6 +438,7 @@ def get_all_jobs(
     search: Optional[str] = None,
     min_match_score: Optional[int] = None,
     max_years_experience: Optional[int] = None,
+    sort_by: str = "latest",
     user_id: str = "default",
     preferences: Optional[UserPreferences] = None,
 ) -> List[dict]:
@@ -581,6 +582,9 @@ def get_all_jobs(
         params.append(eff_max_exp)
 
     where_clause = " AND ".join(query_parts)
+    
+    order_clause = "j.published_at DESC, composite_rank_score DESC" if sort_by == "latest" else "composite_rank_score DESC, j.published_at DESC"
+
     sql = f"""
     SELECT j.*, a.status as application_status, a.applied_date, a.notes as application_notes,
     (
@@ -593,7 +597,7 @@ def get_all_jobs(
     FROM jobs j
     LEFT JOIN job_applications a ON j.id = a.job_id
     WHERE {where_clause}
-    ORDER BY composite_rank_score DESC, j.published_at DESC
+    ORDER BY {order_clause}
     """
 
     cursor.execute(sql, tuple(params))

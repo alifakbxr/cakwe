@@ -48,6 +48,7 @@ export default function App() {
   const [onlySmallCompanies, setOnlySmallCompanies] = useState(false)
   const [minMatchScore, setMinMatchScore] = useState<number | null>(80)
   const [maxExpYears, setMaxExpYears] = useState<number | null>(3)
+  const [sortBy, setSortBy] = useState<'latest' | 'fit'>('latest')
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null)
   const [diagnostics, setDiagnostics] = useState<any>(null)
   
@@ -192,7 +193,8 @@ export default function App() {
         status: onlyVerified ? 'verified_eligible' : '',
         only_small: onlySmallCompanies ? 'true' : 'false',
         include_closed: showClosed ? 'true' : 'false',
-        role: selectedRole
+        role: selectedRole,
+        sort_by: sortBy
       })
       if (minMatchScore !== null) {
         params.append('min_score', String(minMatchScore))
@@ -230,7 +232,7 @@ export default function App() {
 
   useEffect(() => {
     fetchJobsAndStats()
-  }, [onlyVerified, onlySmallCompanies, showClosed, selectedRole, minMatchScore, maxExpYears])
+  }, [onlyVerified, onlySmallCompanies, showClosed, selectedRole, minMatchScore, maxExpYears, sortBy])
 
   useEffect(() => {
     fetchSyncStatus()
@@ -796,6 +798,27 @@ export default function App() {
                   />
                   Tampilkan lowongan tutup
                 </label>
+
+                {/* Sort Order Toggle */}
+                <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 p-0.5 rounded-lg ml-auto">
+                  <span className="text-[11px] text-slate-400 px-2 font-medium">Urutkan:</span>
+                  <Button
+                    size="sm"
+                    variant={sortBy === 'latest' ? 'default' : 'ghost'}
+                    onClick={() => setSortBy('latest')}
+                    className="h-6 px-2.5 text-[11px]"
+                  >
+                    Terbaru
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={sortBy === 'fit' ? 'default' : 'ghost'}
+                    onClick={() => setSortBy('fit')}
+                    className="h-6 px-2.5 text-[11px]"
+                  >
+                    Kecocokan (Fit)
+                  </Button>
+                </div>
               </div>
             </div>
           </Card>
