@@ -152,7 +152,6 @@ function SidebarNav({
             <div className="overflow-hidden">
               <div className="flex items-center gap-1.5">
                 <span className="text-sm font-extrabold tracking-tight text-white">Cakwe</span>
-                <Badge variant="default" className="text-[9px] px-1.5 py-0">v2.0</Badge>
               </div>
               <p className="text-[10px] text-slate-400 truncate">
                 AI Job Radar & Studio

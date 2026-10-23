@@ -313,7 +313,16 @@ async def tailor_resume(req: ResumeTailorRequest):
 @app.post("/api/resume/parse-file")
 async def parse_resume_file(file: UploadFile = File(...)):
     """Menerima unggahan file resume (PDF/DOCX/TXT) dan mengekstrak teksnya secara aman in-memory."""
+    # Batasi ukuran file maksimum 10MB untuk mencegah DoS/memory exhaustion
+    max_size_bytes = 10 * 1024 * 1024
     contents = await file.read()
+    if len(contents) > max_size_bytes:
+        raise HTTPException(status_code=413, detail="File too large. Maximum allowed size is 10MB.")
+
+    valid_extensions = (".pdf", ".docx", ".doc", ".txt")
+    if not file.filename or not any(file.filename.lower().endswith(ext) for ext in valid_extensions):
+        raise HTTPException(status_code=400, detail="Unsupported file format. Please upload a PDF, DOCX, or TXT file.")
+
     try:
         extracted_text = parse_resume_document(file.filename, contents)
         return {"filename": file.filename, "text": extracted_text}

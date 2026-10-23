@@ -374,7 +374,10 @@ export default function App() {
       const a = document.createElement('a')
       a.href = url
       a.download = `Resume_${optimizedResult.resume.contact.full_name.replace(/\s+/g, '_')}_${template}.docx`
+      document.body.appendChild(a)
       a.click()
+      a.remove()
+      setTimeout(() => window.URL.revokeObjectURL(url), 1000)
     } catch (err: any) {
       alert(err.message)
     }
@@ -399,7 +402,10 @@ export default function App() {
       const a = document.createElement('a')
       a.href = url
       a.download = `Cover_Letter_${optimizedResult.resume.contact.full_name.replace(/\s+/g, '_')}.docx`
+      document.body.appendChild(a)
       a.click()
+      a.remove()
+      setTimeout(() => window.URL.revokeObjectURL(url), 1000)
     } catch (err: any) {
       alert(err.message)
     }
@@ -450,7 +456,10 @@ export default function App() {
       const a = document.createElement('a')
       a.href = url
       a.download = `Resume_${optimizedResult.resume.contact.full_name.replace(/\s+/g, '_')}_${template}.pdf`
+      document.body.appendChild(a)
       a.click()
+      a.remove()
+      setTimeout(() => window.URL.revokeObjectURL(url), 1000)
     } catch (err: any) {
       alert(err.message)
     }
@@ -475,7 +484,10 @@ export default function App() {
       const a = document.createElement('a')
       a.href = url
       a.download = `Cover_Letter_${optimizedResult.resume.contact.full_name.replace(/\s+/g, '_')}.pdf`
+      document.body.appendChild(a)
       a.click()
+      a.remove()
+      setTimeout(() => window.URL.revokeObjectURL(url), 1000)
     } catch (err: any) {
       alert(err.message)
     }

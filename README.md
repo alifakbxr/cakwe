@@ -1,122 +1,184 @@
-# Cakwe (Job Radar & ATS Tailor) 🎯
+# Cakwe (Remote Job Radar & ATS Studio) 🎯
 
-Cakwe adalah platform intelijen pencarian kerja remote global dan asisten pelamar terautomasi khusus untuk software engineer di Indonesia. Cakwe mengumpulkan lowongan kerja secara langsung dari public feeds Applicant Tracking System (ATS) tier-1 dan agregator global, memfilter kelayakan geografis secara ketat menggunakan LLM, serta menyediakan suite pembuatan CV & Cover Letter terarah standar Harvard/MIT.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6+-3178C6.svg)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC.svg)](https://tailwindcss.com/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
 
----
+**Cakwe** is a local-first, privacy-respecting career intelligence platform and automated application assistant designed for software engineers seeking authentic, verified global remote opportunities.
 
-## 🌟 Fitur Utama
-
-### 1. Dynamic Discovery & Multi-ATS Ingestion Engine
-- **Zero Hardcoded Seeds:** Penemuan perusahaan berjalan 100% dinamis melalui auto-sniffing URL lamaran agregator, web discovery crawler, dan sinkronisasi berkala candidate queue (`discovery_candidates`).
-- **Direct ATS Integration:** Mengagregasi lowongan langsung dari API publik Greenhouse, Lever, Ashby, Workable, SmartRecruiters, dan Recruitee tanpa scraping web yang rapuh.
-- **High-Throughput Concurrency:** Polling paralel terkontrol (`asyncio.Semaphore(5)`) untuk ratusan board perusahaan dalam hitungan detik.
-- **Lifecycle Tracking:** Verifikasi otomatis apakah lowongan masih aktif atau sudah ditutup (`lifecycle_status: 'closed'`).
-
-### 2. Evaluasi Kelayakan & Anti-Ghost Job
-- **Strict Indonesia Remote Verification:** Evaluasi kontrak kerja (EOR seperti Deel/Remote.com, Worldwide, SEA timezone) menggunakan AI reasoning. Tidak meloloskan lowongan yang membatasi visa atau hanya remote US/EU.
-- **Ghost Job & Seniority Risk Scoring:** Analisis tanggal publikasi, ketidakjelasan deskripsi kerja, dan verifikasi rasional terhadap rentang kompensasi.
-- **Independent Startup Prioritization:** Mendeteksi dan memprioritaskan startup independen (10–100 karyawan) dari berbagai industri (Fintech, Healthtech, Logistics, E-commerce, Gaming, SaaS, dll).
-- **Developer Platform & Big Tech Filtering:** Mengidentifikasi dan menyembunyikan perusahaan platform developer (developer tools, CI/CD, dev infrastructure) serta korporasi besar tier-1 (>100 karyawan) dari feed utama startup, dengan opsi transparansi 1-click relax filter.
-
-### 3. Smart Search & Feed Diagnostics
-- **Multi-Column Stack Search:** Filter peran mencari ke seluruh `title`, `skills_required`, `categories`, dan `description`.
-- **Feed Diagnostics Transparency:** Menampilkan alert banner interaktif ketika lowongan tersembunyi akibat filter umur lowongan, developer platform tools, atau korporasi besar, lengkap dengan rincian jumlah dan tombol relaksasi.
-
-### 4. ATS Resume & Cover Letter Studio
-- **Mode A (CV Tailoring):** Unggah atau tempel CV yang sudah ada untuk dianalisis kecocokannya terhadap deskripsi lowongan secara instan.
-- **Mode B (Resume Builder):** Bangun resume terstruktur dari cerita latar belakang dan keahlian teknis.
-- **Harvard/MIT Formatter:** Ekspor langsung ke format `.docx` atau `.pdf` siap kirim.
-- **Cover Letter Generator:** Pembuatan surat lamaran terpersonalisasi yang menonjolkan relevansi proyek Anda.
-
-### 5. Application Tracker (Kanban)
-- Papan Kanban untuk mengelola status lamaran: *Saved*, *Applied*, *Interviewing*, *Offered*, hingga *Rejected*.
+Cakwe aggregates job requisitions directly from public ATS feeds and open job APIs, runs LLM-driven geographic eligibility and ghost-job risk evaluations, and provides an integrated Harvard/MIT-compliant ATS Resume and Cover Letter Studio.
 
 ---
 
-## 🏗️ Arsitektur Teknologi
+## 🌟 Key Features
 
-- **Backend:** Python 3.12, FastAPI, SQLite (WAL mode dengan retry busy timeout), Uvicorn, HTTPX (Async), Pydantic v2.
-- **AI Engine:** Google Gemini API (gemini-2.5-flash) dengan fallback model terotomasi.
-- **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, Lucide React Icons.
-- **Deployment:** Docker & Docker Compose multi-stage build.
+### 1. Multi-ATS Ingestion & Dynamic Company Discovery
+- **Direct Public ATS Integration:** Pulls postings directly from Greenhouse, Lever, Ashby, Workable, SmartRecruiters, and Recruitee public APIs without fragile HTML scraping.
+- **Dynamic Sniffing:** Discovers new hiring companies from application URLs, public ATS boards, and open datasets.
+- **High-Throughput Concurrency:** Bounded asynchronous polling with polite rate-limiting (`asyncio.Semaphore(5)`).
+- **Automated Lifecycle Tracking:** Continuously verifies whether job listings remain active or have closed.
+
+### 2. Strict Cross-Border Eligibility & Anti-Ghost Job Verification
+- **Verified Cross-Border Remote:** AI reasoning evaluates contracts (Employer of Record / Deel / Remote.com, Worldwide, APAC timezones). Fails closed on US/EU-only restrictions or unstated visa sponsorship.
+- **Ghost Job Risk Scoring:** Detects stale postings, vague job requirements, and unrealistic compensation ranges.
+- **Boutique & Independent Startup Filters:** Optional filter to prioritize high-growth startups (10–100 employees) while filtering out massive enterprises or dev platforms.
+
+### 3. Integrated ATS Resume & Cover Letter Studio
+- **Mode A (CV Tailoring):** Upload an existing resume (PDF, DOCX, or TXT) to instantly analyze match scores and generate targeted Harvard/MIT single-column bullet points using Google's X-Y-Z formula (`Accomplished [X], as measured by [Y], by doing [Z]`).
+- **Mode B (Profile Builder):** Build targeted resumes from scratch using background stories and skill profiles.
+- **Export Ready:** Generate downloadable, ATS-compliant `.docx` and `.pdf` files.
+- **Cover Letter Generation:** Personalized cover letters tailored to each job description with in-place editing.
+
+### 4. Application Tracker (Kanban Board)
+- Track application pipelines from *Saved*, *Applied*, *Interviewing*, *Offered*, to *Rejected* with personal notes and submission dates.
+
+### 5. Local MCP (Model Context Protocol) Server
+- Includes an MCP server (`backend/mcp_server.py`) allowing AI coding assistants (Claude Desktop, Cursor, Antigravity) to query verified remote jobs and update tracker statuses via JSON-RPC.
 
 ---
 
-## 🚀 Panduan Memulai Cepat
+## 🏗️ Architecture & Tech Stack
 
-### Prasyarat
+```text
+┌────────────────────────────────────────────────────────┐
+│                   Cakwe Architecture                   │
+├─────────────────────────┬──────────────────────────────┤
+│ Frontend (Port 3333)    │ React 19, TypeScript, Vite   │
+│                         │ Tailwind CSS v4, Lucide      │
+├─────────────────────────┼──────────────────────────────┤
+│ Backend API (Port 8888) │ FastAPI, Python 3.12         │
+│                         │ HTTPX Async, Pydantic v2     │
+├─────────────────────────┼──────────────────────────────┤
+│ Intelligence & Parsing  │ Google Gemini (Flash)        │
+│                         │ Ollama (Local Fallback)      │
+│                         │ PyPDF, python-docx, ReportLab│
+├─────────────────────────┼──────────────────────────────┤
+│ Database & Storage      │ SQLite (WAL mode, busy_wait) │
+└─────────────────────────┴──────────────────────────────┘
+```
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
 - [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/)
-- API Key Google Gemini (opsional jika menggunakan cache, wajib untuk ingestion AI)
+- Google Gemini API Key (get a free key at [Google AI Studio](https://aistudio.google.com))
 
-### 1. Kloning Repositori
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/alifakbxr/cakwe.git
 cd cakwe
 ```
 
-### 2. Konfigurasi Lingkungan
-Buat file `backend/.env` dari contoh template:
+### 2. Configure Environment Variables
+Copy the template `.env.example` to `.env`:
 ```bash
-cp backend/.env.example backend/.env
+cp .env.example .env
 ```
-Isi variabel berikut:
+Open `.env` and set your `GEMINI_API_KEY`:
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
-GEMINI_MODEL=gemini-2.5-flash
-FALLBACK_GEMINI_MODELS=gemini-2.0-flash,gemini-1.5-flash
 ```
 
-### 3. Menjalankan via Docker
+### 3. Start with Docker Compose
 ```bash
 docker compose up -d --build
 ```
-Aplikasi akan tersedia di:
+
+Access the interfaces:
 - **Frontend Dashboard:** [http://localhost:3333](http://localhost:3333)
-- **Backend API Docs:** [http://localhost:8888/docs](http://localhost:8888/docs)
+- **Backend Swagger Docs:** [http://localhost:8888/docs](http://localhost:8888/docs)
 
 ---
 
-## 🧪 Menjalankan Pengujian (Tests)
+## 💻 Manual / Local Development Setup
 
-Semua unit & integration test berada di dalam direktori `backend/tests/`:
+If you prefer running without Docker:
+
+### Backend (Python)
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp ../.env.example .env
+uvicorn main:app --reload --port 8000
+```
+
+### Frontend (TypeScript / React)
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## 🧪 Testing
+
+Run automated tests inside Docker:
 ```bash
 docker compose exec backend pytest -v tests/
 ```
 
-Skenario pengujian mencakup:
-- Ingestion board ATS & URL sniffing regex.
-- Geographic eligibility (16 skenario kepatuhan izin kerja global vs Indonesia).
-- User preferences persistence & SQLite concurrent access.
-- Strict startup filtering rules.
+Or run locally:
+```bash
+pytest backend/tests/
+```
+
+Type check the frontend:
+```bash
+cd frontend
+npx tsc --noEmit
+```
 
 ---
 
-## 📂 Struktur Repositori
+## 📂 Project Structure
 
 ```text
 cakwe/
 ├── backend/
-│   ├── sources/             # Adaptor ATS (Greenhouse, Lever, Ashby, Workable, dll)
+│   ├── sources/             # ATS adapters (Greenhouse, Lever, Ashby, Workable, etc.)
 │   ├── tests/               # Pytest suite
-│   ├── ai_processor.py      # LLM reasoning & enrichment
-│   ├── curate_samples.py    # Rule-based pre-filtering
-│   ├── database.py          # SQLite schema & repository
-│   ├── discovery.py         # ATS board candidate crawler
+│   ├── ai_processor.py      # LLM reasoning and structured extraction
+│   ├── database.py          # SQLite schema, indexing & query layer
+│   ├── discovery.py         # Autonomous ATS board discovery crawler
+│   ├── file_parser.py       # PDF/DOCX/TXT in-memory extraction
 │   ├── main.py              # FastAPI endpoints
-│   ├── poller.py            # Scheduler & parallel worker ingestion
+│   ├── mcp_server.py        # Model Context Protocol (MCP) server
+│   ├── poller.py            # Hourly background ingestion worker
+│   ├── resume_builder.py    # ReportLab PDF & python-docx generator
 │   └── requirements.txt
+├── data/                    # SQLite database & local storage (mounted volume)
 ├── frontend/
 │   ├── src/
-│   │   ├── components/      # React UI components (Dashboard, Kanban, ATS Studio)
-│   │   ├── types.ts         # TypeScript definitions
-│   │   └── App.tsx
+│   │   ├── components/      # UI Views (Dashboard, Kanban, ATS Studio, Settings)
+│   │   ├── types.ts         # Shared TypeScript interfaces
+│   │   └── App.tsx          # Main application component
 │   ├── package.json
 │   └── vite.config.ts
+├── .env.example             # Configuration template
+├── CONTRIBUTING.md          # Contribution guidelines
+├── LICENSE                  # MIT License
+├── SECURITY.md              # Security and vulnerability disclosure policy
 ├── docker-compose.yml
 └── README.md
 ```
 
 ---
 
-## 📄 Lisensi
-Distributed under the MIT License.
+## 🤝 Contributing
+
+Contributions are warmly welcomed! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on code style, testing requirements, and the pull request process.
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
