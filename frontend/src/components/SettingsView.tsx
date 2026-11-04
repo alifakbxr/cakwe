@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { 
   Globe, 
   Building, 
@@ -76,7 +76,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
 
   const hasUnsavedChanges = JSON.stringify(preferences) !== JSON.stringify(initialPreferences)
 
-  const fetchPreferences = async () => {
+  const fetchPreferences = useCallback(async () => {
     try {
       setLoading(true)
       const res = await fetch('/api/preferences')
@@ -91,11 +91,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    fetchPreferences()
-  }, [])
+    void fetchPreferences()
+  }, [fetchPreferences])
 
   const handleSave = async () => {
     try {
@@ -112,8 +112,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
       setInitialPreferences(data.preferences)
       setFeedback({ type: 'success', message: 'Preferences saved successfully to the system.' })
       if (onPreferencesUpdated) onPreferencesUpdated()
-    } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message || 'An error occurred while saving preferences.' })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'An error occurred while saving preferences.'
+      setFeedback({ type: 'error', message: msg })
     } finally {
       setSaving(false)
     }
@@ -133,8 +134,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
       setInitialPreferences(data.preferences)
       setFeedback({ type: 'success', message: 'Preferences have been restored to factory defaults.' })
       if (onPreferencesUpdated) onPreferencesUpdated()
-    } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message || 'Failed to reset preferences.' })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to reset preferences.'
+      setFeedback({ type: 'error', message: msg })
     } finally {
       setSaving(false)
     }
@@ -147,8 +149,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onPreferencesUpdated
       const res = await fetch('/api/preferences/rerun-discovery', { method: 'POST' })
       if (!res.ok) throw new Error('Failed to trigger radar sync')
       setFeedback({ type: 'success', message: 'Job radar re-alignment with your preferences is running in the background.' })
-    } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message || 'Failed to trigger sync.' })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to trigger sync.'
+      setFeedback({ type: 'error', message: msg })
     } finally {
       setSyncing(false)
     }

@@ -1,4 +1,5 @@
 import pytest
+import time
 from database import init_db, get_user_preferences, save_user_preferences, reset_user_preferences, get_all_jobs
 from schemas import UserPreferences
 
@@ -93,6 +94,7 @@ def test_unbiased_matching_and_experience_filtering():
     try:
         database.DB_PATH = temp_db_path
         database.init_db()
+        now_ts = int(time.time()) - 3600
 
         # Job A: Enterprise, Fit 85, Exp 2, Full-Time -> MUST PASS when only_small_companies=False
         job_a = JobRequisition(
@@ -102,7 +104,7 @@ def test_unbiased_matching_and_experience_filtering():
             company_name="Mega Enterprise Corp",
             location="Remote Worldwide",
             description="Go backend systems.",
-            published_at=1792260000,
+            published_at=now_ts,
             intelligence=make_test_intel(CompanySizeCategory.LARGE_ENTERPRISE, 85, 2, EmploymentType.FULL_TIME)
         )
         database.save_job(job_a)
@@ -115,7 +117,7 @@ def test_unbiased_matching_and_experience_filtering():
             company_name="Small App Startup",
             location="Remote Worldwide",
             description="Java apps.",
-            published_at=1792260000,
+            published_at=now_ts,
             intelligence=make_test_intel(CompanySizeCategory.SMALL_STARTUP, 75, 1, EmploymentType.CONTRACT)
         )
         database.save_job(job_b)
@@ -128,7 +130,7 @@ def test_unbiased_matching_and_experience_filtering():
             company_name="Fast Startup",
             location="Remote Worldwide",
             description="Senior architect.",
-            published_at=1792260000,
+            published_at=now_ts,
             intelligence=make_test_intel(CompanySizeCategory.SMALL_STARTUP, 90, 5, EmploymentType.FULL_TIME)
         )
         database.save_job(job_c)
@@ -141,7 +143,7 @@ def test_unbiased_matching_and_experience_filtering():
             company_name="Digital Studio",
             location="Remote Worldwide",
             description="Vue and Laravel dev.",
-            published_at=1792260000,
+            published_at=now_ts,
             intelligence=make_test_intel(CompanySizeCategory.AGENCY_STUDIO, 88, None, EmploymentType.EOR)
         )
         database.save_job(job_d)

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { 
   RefreshCw, 
   Briefcase, 
@@ -16,7 +16,9 @@ import type {
   ViewTab, 
   OptimizedResumeResult, 
   ContactInfo,
-  ResumeTemplate 
+  ResumeTemplate,
+  FilterDiagnostics,
+  TailoredResumeVersion
 } from './types'
 
 import { AppShell } from './components/AppShell'
@@ -50,7 +52,7 @@ export default function App() {
   const [maxExpYears, setMaxExpYears] = useState<number | null>(3)
   const [sortBy, setSortBy] = useState<'latest' | 'fit'>('latest')
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null)
-  const [diagnostics, setDiagnostics] = useState<any>(null)
+  const [diagnostics, setDiagnostics] = useState<FilterDiagnostics | null>(null)
   
   // Modals
   const [trackingModalJob, setTrackingModalJob] = useState<Job | null>(null)
@@ -72,10 +74,15 @@ export default function App() {
   const [optimizedResult, setOptimizedResult] = useState<OptimizedResumeResult | null>(null)
   const [editableCoverLetter, setEditableCoverLetter] = useState('')
   const [copiedLetter, setCopiedLetter] = useState(false)
-  const [savedHistory, setSavedHistory] = useState<any[]>([])
+  const [savedHistory, setSavedHistory] = useState<TailoredResumeVersion[]>([])
 
   // Mode A
-  const [rawResumeText, setRawResumeText] = useState('')
+  const [rawResumeText, setRawResumeText] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('user_resume_draft') || ''
+    }
+    return ''
+  })
   const [uploadFileName, setUploadFileName] = useState('')
   const [isUploading, setIsUploading] = useState(false)
 
@@ -101,7 +108,7 @@ export default function App() {
     { label: 'AI Engineer / Python', value: 'AI' },
   ]
 
-  const fetchSyncStatus = async () => {
+  const fetchSyncStatus = useCallback(async () => {
     try {
       const res = await fetch('/api/sync/status')
       if (res.ok) {
@@ -111,7 +118,51 @@ export default function App() {
     } catch (err) {
       console.error('Failed to fetch sync status', err)
     }
-  }
+  }, [])
+
+  const fetchJobsAndStats = useCallback(async () => {
+    try {
+      setLoading(true)
+      const params = new URLSearchParams({
+        status: onlyVerified ? 'verified_eligible' : '',
+        only_small: onlySmallCompanies ? 'true' : 'false',
+        include_closed: showClosed ? 'true' : 'false',
+        role: selectedRole,
+        sort_by: sortBy
+      })
+      if (minMatchScore !== null) {
+        params.append('min_score', String(minMatchScore))
+      } else {
+        params.append('min_score', '0')
+      }
+      if (maxExpYears !== null) {
+        params.append('max_exp', String(maxExpYears))
+      } else {
+        params.append('max_exp', '99')
+      }
+      const [jobsRes, statsRes] = await Promise.all([
+        fetch(`/api/jobs?${params.toString()}`),
+        fetch('/api/stats')
+      ])
+
+      if (jobsRes.ok) {
+        const jobsData = await jobsRes.json()
+        setJobs(jobsData.jobs)
+        if (jobsData.diagnostics) {
+          setDiagnostics(jobsData.diagnostics)
+        }
+      }
+
+      if (statsRes.ok) {
+        const statsData = await statsRes.json()
+        setStats(statsData)
+      }
+    } catch (err) {
+      console.error('Failed to fetch data', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [onlyVerified, onlySmallCompanies, showClosed, selectedRole, sortBy, minMatchScore, maxExpYears])
 
   const triggerManualSync = async () => {
     try {
@@ -186,59 +237,13 @@ export default function App() {
     }
   }
 
-  const fetchJobsAndStats = async () => {
-    try {
-      setLoading(true)
-      const params = new URLSearchParams({
-        status: onlyVerified ? 'verified_eligible' : '',
-        only_small: onlySmallCompanies ? 'true' : 'false',
-        include_closed: showClosed ? 'true' : 'false',
-        role: selectedRole,
-        sort_by: sortBy
-      })
-      if (minMatchScore !== null) {
-        params.append('min_score', String(minMatchScore))
-      } else {
-        params.append('min_score', '0')
-      }
-      if (maxExpYears !== null) {
-        params.append('max_exp', String(maxExpYears))
-      } else {
-        params.append('max_exp', '99')
-      }
-      const [jobsRes, statsRes] = await Promise.all([
-        fetch(`/api/jobs?${params.toString()}`),
-        fetch('/api/stats')
-      ])
-
-      if (jobsRes.ok) {
-        const jobsData = await jobsRes.json()
-        setJobs(jobsData.jobs)
-        if (jobsData.diagnostics) {
-          setDiagnostics(jobsData.diagnostics)
-        }
-      }
-
-      if (statsRes.ok) {
-        const statsData = await statsRes.json()
-        setStats(statsData)
-      }
-    } catch (err) {
-      console.error('Failed to fetch data', err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  useEffect(() => {
+    void fetchJobsAndStats()
+  }, [fetchJobsAndStats])
 
   useEffect(() => {
-    fetchJobsAndStats()
-  }, [onlyVerified, onlySmallCompanies, showClosed, selectedRole, minMatchScore, maxExpYears, sortBy])
-
-  useEffect(() => {
-    fetchSyncStatus()
-    const saved = localStorage.getItem('user_resume_draft')
-    if (saved) setRawResumeText(saved)
-  }, [])
+    void fetchSyncStatus()
+  }, [fetchSyncStatus])
 
   const getApplicationUrl = (job: Job): string => {
     if (job.application_url && job.application_url.startsWith('http')) {
@@ -268,8 +273,9 @@ export default function App() {
       setRawResumeText(data.text)
       setUploadFileName(file.name)
       localStorage.setItem('user_resume_draft', data.text)
-    } catch (err: any) {
-      alert(`Failed to read file: ${err.message}`)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      alert(`Failed to read file: ${msg}`)
     } finally {
       setIsUploading(false)
     }
@@ -291,8 +297,9 @@ export default function App() {
       const data = await res.json()
       setOptimizedResult(data)
       setEditableCoverLetter(data.cover_letter || '')
-    } catch (err: any) {
-      alert(`Error: ${err.message}`)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      alert(`Error: ${msg}`)
     } finally {
       setIsProcessing(false)
     }
@@ -317,8 +324,9 @@ export default function App() {
       const data = await res.json()
       setOptimizedResult(data)
       setEditableCoverLetter(data.cover_letter || '')
-    } catch (err: any) {
-      alert(`Error: ${err.message}`)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      alert(`Error: ${msg}`)
     } finally {
       setIsProcessing(false)
     }
@@ -341,9 +349,10 @@ export default function App() {
       })
       if (res.ok) {
         alert('Resume version saved successfully!')
-        loadHistory(activeJobForBuilder.id)
+        void loadHistory(activeJobForBuilder.id)
       }
     } catch (err) {
+      console.error('Failed to save resume version', err)
       alert('Failed to save resume version')
     }
   }
@@ -378,8 +387,9 @@ export default function App() {
       a.click()
       a.remove()
       setTimeout(() => window.URL.revokeObjectURL(url), 1000)
-    } catch (err: any) {
-      alert(err.message)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      alert(msg)
     }
   }
 
@@ -406,13 +416,14 @@ export default function App() {
       a.click()
       a.remove()
       setTimeout(() => window.URL.revokeObjectURL(url), 1000)
-    } catch (err: any) {
-      alert(err.message)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      alert(msg)
     }
   }
 
   const handleCopyCoverLetter = () => {
-    navigator.clipboard.writeText(editableCoverLetter)
+    void navigator.clipboard.writeText(editableCoverLetter)
     setCopiedLetter(true)
     setTimeout(() => setCopiedLetter(false), 2000)
   }
@@ -435,8 +446,9 @@ export default function App() {
       const updated = { ...optimizedResult }
       updated.cover_letter = data.cover_letter
       setOptimizedResult(updated)
-    } catch (err: any) {
-      alert(err.message)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      alert(msg)
     } finally {
       setIsRegeneratingLetter(false)
     }
@@ -460,8 +472,9 @@ export default function App() {
       a.click()
       a.remove()
       setTimeout(() => window.URL.revokeObjectURL(url), 1000)
-    } catch (err: any) {
-      alert(err.message)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      alert(msg)
     }
   }
 
@@ -488,26 +501,29 @@ export default function App() {
       a.click()
       a.remove()
       setTimeout(() => window.URL.revokeObjectURL(url), 1000)
-    } catch (err: any) {
-      alert(err.message)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      alert(msg)
     }
   }
 
 
-  // Client search filtering (safe & defensive)
-  const filteredJobs = jobs.filter(job => {
+  // Client search filtering (safe & defensive with useMemo)
+  const filteredJobs = useMemo(() => {
     const q = searchQuery.trim().toLowerCase()
-    if (!q) {
-      return !onlyVerified || job.eligibility_status === 'verified_eligible'
-    }
-    const matchTitle = Boolean(job.title?.toLowerCase().includes(q))
-    const matchCompany = Boolean(job.company_name?.toLowerCase().includes(q))
-    const matchSkills = Array.isArray(job.skills_required) && job.skills_required.some(s => typeof s === 'string' && s.toLowerCase().includes(q))
-    const matchQuery = matchTitle || matchCompany || matchSkills
-    const matchVerified = !onlyVerified || job.eligibility_status === 'verified_eligible'
+    return jobs.filter(job => {
+      if (!q) {
+        return !onlyVerified || job.eligibility_status === 'verified_eligible'
+      }
+      const matchTitle = Boolean(job.title?.toLowerCase().includes(q))
+      const matchCompany = Boolean(job.company_name?.toLowerCase().includes(q))
+      const matchSkills = Array.isArray(job.skills_required) && job.skills_required.some(s => typeof s === 'string' && s.toLowerCase().includes(q))
+      const matchQuery = matchTitle || matchCompany || matchSkills
+      const matchVerified = !onlyVerified || job.eligibility_status === 'verified_eligible'
 
-    return matchQuery && matchVerified
-  })
+      return matchQuery && matchVerified
+    })
+  }, [jobs, searchQuery, onlyVerified])
 
   return (
     <AppShell

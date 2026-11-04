@@ -29,16 +29,11 @@ export function SidebarProvider({
   children: React.ReactNode
   defaultCollapsed?: boolean
 }) {
-  const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed)
+  const [isCollapsed, setIsCollapsed] = React.useState(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("cakwe_sidebar_collapsed") : null
+    return saved !== null ? saved === "true" : defaultCollapsed
+  })
   const [isMobileOpen, setIsMobileOpen] = React.useState(false)
-
-  // Persist sidebar state in localStorage
-  React.useEffect(() => {
-    const saved = localStorage.getItem("cakwe_sidebar_collapsed")
-    if (saved !== null) {
-      setIsCollapsed(saved === "true")
-    }
-  }, [])
 
   const setCollapsedWithStorage = (val: boolean | ((prev: boolean) => boolean)) => {
     setIsCollapsed(prev => {

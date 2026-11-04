@@ -12,7 +12,7 @@ import {
   Layers,
   ShieldCheck
 } from 'lucide-react'
-import type { Job, OptimizedResumeResult, ContactInfo, ResumeTemplate, ATSValidationReport } from '../types'
+import type { Job, OptimizedResumeResult, ContactInfo, ResumeTemplate, ATSValidationReport, TailoredResumeVersion } from '../types'
 
 interface ATSStudioModalProps {
   job: Job
@@ -40,7 +40,7 @@ interface ATSStudioModalProps {
   onGenerateModeB: () => void
 
   // History & Result
-  savedHistory: any[]
+  savedHistory: TailoredResumeVersion[]
   isProcessing: boolean
   optimizedResult: OptimizedResumeResult | null
   setOptimizedResult: React.Dispatch<React.SetStateAction<OptimizedResumeResult | null>>
@@ -412,7 +412,7 @@ export const ATSStudioModal: React.FC<ATSStudioModalProps> = ({
                   )}
 
                   <span className="text-xs bg-emerald-950/80 text-emerald-300 border border-emerald-600/60 px-2 py-0.5 rounded font-bold">
-                    {optimizedResult.analysis?.match_score ?? (optimizedResult as any)?.match_score ?? 0}% ATS Fit
+                    {optimizedResult.analysis?.match_score ?? 0}% ATS Fit
                   </span>
                 </div>
 

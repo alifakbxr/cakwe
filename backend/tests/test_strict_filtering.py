@@ -2,6 +2,7 @@ import pytest
 import sqlite3
 import tempfile
 import os
+import time
 from database import init_db, save_job, get_all_jobs
 from schemas import (
     JobRequisition, 
@@ -57,6 +58,7 @@ def test_strict_filtering_rules():
         original_db_path = database.DB_PATH
         database.DB_PATH = temp_db_path
         init_db()
+        now_ts = int(time.time()) - 3600
 
         # Job 1: Verified eligible, small startup (10-50), fully remote -> SHOULD PASS
         job1 = JobRequisition(
@@ -66,7 +68,7 @@ def test_strict_filtering_rules():
             company_name="Boutique Studio",
             location="Remote - Worldwide",
             description="Building web applications using Laravel, Vue, and TypeScript in a remote team.",
-            published_at=1792260000,
+            published_at=now_ts,
             intelligence=make_dummy_intel(
                 EligibilityStatus.VERIFIED_ELIGIBLE,
                 "Open worldwide to all candidates including Indonesia via Deel EOR",
@@ -86,7 +88,7 @@ def test_strict_filtering_rules():
             company_name="MegaCorp Enterprise",
             location="Remote - Global",
             description="Enterprise cloud systems.",
-            published_at=1792260000,
+            published_at=now_ts,
             intelligence=make_dummy_intel(
                 EligibilityStatus.VERIFIED_ELIGIBLE,
                 "Remote worldwide",
@@ -106,7 +108,7 @@ def test_strict_filtering_rules():
             company_name="Small US Startup",
             location="Remote - US Only",
             description="US candidates only.",
-            published_at=1792260000,
+            published_at=now_ts,
             intelligence=make_dummy_intel(
                 EligibilityStatus.INELIGIBLE,
                 "Must reside in US with green card / citizenship",
@@ -126,7 +128,7 @@ def test_strict_filtering_rules():
             company_name="Mystery Tech",
             location="Worldwide Remote",
             description="Developing apps.",
-            published_at=1792260000,
+            published_at=now_ts,
             intelligence=make_dummy_intel(
                 EligibilityStatus.VERIFIED_ELIGIBLE,
                 "Open worldwide",
@@ -146,7 +148,7 @@ def test_strict_filtering_rules():
             company_name="Local Agency",
             location="Berlin, Germany (Onsite)",
             description="Onsite presence mandatory in Berlin office.",
-            published_at=1792260000,
+            published_at=now_ts,
             intelligence=make_dummy_intel(
                 EligibilityStatus.VERIFIED_ELIGIBLE,
                 "Relocation required",
@@ -192,7 +194,7 @@ def test_strict_filtering_rules():
             company_name="Creative Studio",
             location="Remote Worldwide",
             description="We welcome bootcamp grads and self-taught developers. No university degree required.",
-            published_at=1792260000,
+            published_at=now_ts,
             intelligence=make_dummy_intel(
                 EligibilityStatus.VERIFIED_ELIGIBLE,
                 "Remote worldwide via EOR Deel",
@@ -217,7 +219,7 @@ def test_strict_filtering_rules():
             company_name="DevFlow Tools",
             location="Remote Worldwide",
             description="We build CI/CD pipelines and developer automation tools.",
-            published_at=1792260000,
+            published_at=now_ts,
             intelligence=make_dummy_intel(
                 EligibilityStatus.VERIFIED_ELIGIBLE,
                 "Remote worldwide via EOR Deel",
@@ -240,7 +242,7 @@ def test_strict_filtering_rules():
             company_name="HealthPay Inc",
             location="Remote Worldwide",
             description="Healthcare billing and payments software. 100% remote.",
-            published_at=1792260000,
+            published_at=now_ts,
             intelligence=make_dummy_intel(
                 EligibilityStatus.VERIFIED_ELIGIBLE,
                 "Worldwide remote Deel",

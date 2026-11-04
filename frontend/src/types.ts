@@ -48,6 +48,17 @@ export interface ResumeAnalysisReport {
   ats_formatting_advice: string
 }
 
+export interface TailoredResumeVersion {
+  id: number
+  job_id: string
+  job_title: string
+  company_name: string
+  resume_data: FullResumeData
+  analysis_data: ResumeAnalysisReport
+  cover_letter: string
+  created_at: string
+}
+
 export interface OptimizedResumeResult {
   resume: FullResumeData
   analysis: ResumeAnalysisReport
