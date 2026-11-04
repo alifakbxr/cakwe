@@ -93,7 +93,9 @@ def init_db():
 
     # Indeks performa untuk query 14-hari dan match score
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_freshness ON jobs (published_at, lifecycle_status);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_status_freshness ON jobs (eligibility_status, published_at);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_company ON jobs (company_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_company_size_dev ON jobs (company_size_category, is_developer_platform);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_match ON jobs (match_score, is_recommended);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_experience ON jobs (min_years_experience);")
 
@@ -613,30 +615,29 @@ def get_jobs_filter_diagnostics(user_id: str = "default") -> dict:
     conn = get_connection()
     cursor = conn.cursor()
 
-    total_jobs = cursor.execute("SELECT COUNT(*) FROM jobs").fetchone()[0]
-    verified_eligible = cursor.execute("SELECT COUNT(*) FROM jobs WHERE eligibility_status = 'verified_eligible'").fetchone()[0]
-    likely_eligible = cursor.execute("SELECT COUNT(*) FROM jobs WHERE eligibility_status = 'likely_eligible'").fetchone()[0]
-    ineligible = cursor.execute("SELECT COUNT(*) FROM jobs WHERE eligibility_status = 'ineligible'").fetchone()[0]
-
-    hidden_by_freshness = cursor.execute("""
-        SELECT COUNT(*) FROM jobs 
-        WHERE eligibility_status = 'verified_eligible' 
-        AND published_at < ?
-    """, (cutoff_timestamp,)).fetchone()[0]
-
-    hidden_by_large_enterprise = cursor.execute("""
-        SELECT COUNT(*) FROM jobs 
-        WHERE eligibility_status = 'verified_eligible' 
-        AND (company_size_category = 'large_enterprise' OR is_tier1 = 1)
-    """).fetchone()[0]
-
-    hidden_by_dev_platform = cursor.execute("""
-        SELECT COUNT(*) FROM jobs 
-        WHERE eligibility_status = 'verified_eligible' 
-        AND is_developer_platform = 1
-    """).fetchone()[0]
+    # Gabungkan semua perhitungan metrik ke dalam satu query agregasi cepat
+    row = cursor.execute("""
+        SELECT 
+            COUNT(*) as total_jobs,
+            SUM(CASE WHEN eligibility_status = 'verified_eligible' THEN 1 ELSE 0 END) as verified_eligible,
+            SUM(CASE WHEN eligibility_status = 'likely_eligible' THEN 1 ELSE 0 END) as likely_eligible,
+            SUM(CASE WHEN eligibility_status = 'ineligible' THEN 1 ELSE 0 END) as ineligible,
+            SUM(CASE WHEN eligibility_status = 'verified_eligible' AND published_at < ? THEN 1 ELSE 0 END) as hidden_by_freshness,
+            SUM(CASE WHEN eligibility_status = 'verified_eligible' AND (company_size_category = 'large_enterprise' OR is_tier1 = 1) THEN 1 ELSE 0 END) as hidden_by_large_enterprise,
+            SUM(CASE WHEN eligibility_status = 'verified_eligible' AND is_developer_platform = 1 THEN 1 ELSE 0 END) as hidden_by_dev_platform
+        FROM jobs
+    """, (cutoff_timestamp,)).fetchone()
 
     conn.close()
+
+    total_jobs = row["total_jobs"] or 0
+    verified_eligible = row["verified_eligible"] or 0
+    likely_eligible = row["likely_eligible"] or 0
+    ineligible = row["ineligible"] or 0
+    hidden_by_freshness = row["hidden_by_freshness"] or 0
+    hidden_by_large_enterprise = row["hidden_by_large_enterprise"] or 0
+    hidden_by_dev_platform = row["hidden_by_dev_platform"] or 0
+
     return {
         "total_in_db": total_jobs,
         "verified_eligible": verified_eligible,
